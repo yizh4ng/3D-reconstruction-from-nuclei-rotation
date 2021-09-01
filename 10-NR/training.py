@@ -31,8 +31,7 @@ def loss_function(points):
   output = tf.reduce_sum(pair_dif)
   return output
 
-def training(points):
-  sess = tf.Session()
+def training(points, sess, step = 9999999):
   loss = loss_function(points)
 
   # Construct an optimizer
@@ -44,8 +43,7 @@ def training(points):
   print('[0] loss = {}'.format(sess.run(loss)))
   print(sess.run(z))
 
-  pre_value_loss = 99999999
-  for t in range(99999999):
+  for t in range(step):
     sess.run(train_step)
     val_loss = sess.run(loss)
 
@@ -93,37 +91,5 @@ if __name__ == '__main__':
   y = tf.constant(y, dtype=tf.float64)
 
   points = tf.transpose([x, y, z], perm=[1, 2, 0])
-  # Initialize a session
   sess = tf.Session()
-  loss = loss_function(points)
-
-  # Construct an optimizer
-  optimizer = tf.train.GradientDescentOptimizer(1e-6)
-  train_step = optimizer.minimize(loss)
-
-  # Initialize w in GPU
-  sess.run(tf.global_variables_initializer())
-  print('[0] loss = {}'.format(sess.run(loss)))
-  print(sess.run(z))
-
-  pre_value_loss = 99999999
-  for t in range(99999999):
-    sess.run(train_step)
-    val_loss = sess.run(loss)
-
-    #if val_loss < 30:
-    #if t % 10000 == 0 and np.abs(pre_value_loss - val_loss) < 0.01:
-    if  val_loss < 500:
-      print(f'Training compeleted at step {t} with loss:{val_loss}')
-      print('z = {}'.format(sess.run(z)))
-      with open('./z.json', 'w') as f:
-        json.dump(sess.run(z).tolist(), f)
-      with open('./x.json', 'w') as f:
-        json.dump(sess.run(x).tolist(), f)
-      with open('./y.json', 'w') as f:
-        json.dump(sess.run(y).tolist(), f)
-      break
-    if t % 10000 == 0:
-      print('[{}] loss = {}'.format(t + 1, val_loss))
-      print('z = {}'.format(sess.run(z)))
-      pre_value_loss = val_loss
+  training(points, sess)
