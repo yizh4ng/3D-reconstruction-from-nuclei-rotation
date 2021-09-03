@@ -1,3 +1,5 @@
+import json
+import numpy as np
 
 import pandas as pd
 
@@ -45,6 +47,13 @@ def read_x_y_from_pkl(path, max_frame = 0, max_particle = 0):
     y.append(yy)
 
   return x,y
+
+def read(path):
+  x = json.load(open(f'./{path}/x.json'))
+  y = json.load(open(f'./{path}/y.json'))
+  z = json.load(open(f'./{path}/z.json'))
+  return x, y, z
+
 
 
 if __name__ == '__main__':

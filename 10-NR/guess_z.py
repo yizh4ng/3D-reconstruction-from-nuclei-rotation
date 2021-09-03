@@ -1,8 +1,10 @@
 import json
-
+import pickle
+import pandas as pd
 from data_cleasing import read_x_y_from_pkl
 import numpy as np
 from lambo.gui.vinci.vinci import DaVinci
+from visualize_xyz import visualize_xyz
 
 def classify_by_rotation_direction(x, y):
   displacement = (np.array((x[0], y[0])) - np.array((x[1], y[1]))).T
@@ -21,30 +23,41 @@ def predict_origin(x,y):
 def predict_radius(x,y, origin):
   x_, y_ = origin
 
-  return np.max(np.sqrt((x - x_)**2 + (y - y_)**2))
+  return np.max(np.sqrt((x - x_)**2 + (y - y_)**2)) + 0.1
 
-def predict_z(x,y):
+def predict_z(radius, x,y):
 
   x_, y_ = predict_origin(x[0], y[0])
-  radius = predict_radius(x[0],y[0],(x_, y_)) + 0.01
-  front = classify_by_rotation_direction(x, y)
+  radius = predict_radius(x[0],y[0],(x_, y_)) + 1
+  # front = classify_by_rotation_direction(x, y)
   depth = np.sqrt(radius**2 - (x[0] - x_)**2 - (y[0] - y_)**2)
-  return depth * front
+  return depth
 
-
+def predict_z(df:pd.DataFrame):
+  for i in range(int(df['frame'].max()) + 1):
+    frame:pd.DataFrame = df[df['frame'] == i]
+    x = frame['x'].tolist()
+    y = frame['y'].tolist()
+    x_, y_ = predict_origin(x, y)
+    radius = predict_radius(x, y, predict_origin(x, y))
+    assert all(radius**2 - (np.array(x) - x_)**2 - (np.array(y) - y_)**2 >= 0)
+    df['z'].loc[frame.index.tolist()] = \
+      np.sqrt(radius**2 - (np.array(x) - x_)**2 - (np.array(y) - y_)**2).\
+        tolist()
 if __name__ == '__main__':
-  # x, y = read_x_y_from_pkl('data_3.pkl', max_particle=20, max_frame=3)
-  x = json.load(open('./ground_true/x.json'))
-  y = json.load(open('./ground_true/y.json'))
 
-  #prediction = classify_by_rotation_direction(x, y)
-  z = predict_z(x,y)
-  print(z)
-  da = DaVinci()
-  def vis():
-    da.axes3d.view_init(elev=90, azim=0)
-    da.axes3d.plot(x[0],y[0],z,'ro', markersize=2)
+  f = open('data.pkl', 'rb')
+  df:pd.DataFrame = pickle.load(f)
+  df = df[ df['z'] > 0 ]
+  df.drop('z', axis=1,inplace=True)
+  df['z'] = 0
+  predict_z(df)
 
+  print(df.head(40))
 
-  da.add_plotter(vis)
-  da.show()
+  vis = visualize_xyz()
+  x_g, y_g, z_g = vis.read_df(df)
+  max_particle = 100
+  max_frame = 100
+  vis.vis_animation(x_g, y_g, z_g)
+  vis.show()

@@ -1,5 +1,8 @@
-from lambo.gui.vinci.vinci import DaVinci
 import json
+import pickle
+
+from lambo.gui.vinci.vinci import DaVinci
+import pandas as pd
 import numpy as np
 class visualize_xyz(DaVinci):
   def __init__(self, size: int = 5, **kwargs):
@@ -9,7 +12,7 @@ class visualize_xyz(DaVinci):
   def draw_xyz(self, xlist=None, ylist=None, zlist=None):
     fig = self.figure
     ax = self.axes3d
-    self.axes3d.view_init(elev=90, azim=0)
+    self.axes3d.view_init(elev=30, azim=0)
     #ax.set_axis_off()
     #fig.set_facecolor('black')
     #ax.set_facecolor('black')
@@ -17,7 +20,10 @@ class visualize_xyz(DaVinci):
     #ax.w_xaxis.pane.fill = False
     #ax.w_yaxis.pane.fill = False
     #ax.w_zaxis.pane.fill = False
-    ax.plot3D(xlist,ylist,zlist, 'ro', markersize=2)
+    z = np.array(zlist)
+    xlist, ylist, zlist = np.array(xlist),np.array(ylist), np.array(zlist)
+    ax.plot3D(xlist[z>0],ylist[z>0],zlist[z>0], 'ro', markersize=2)
+    ax.plot3D(xlist[z < 0], ylist[z < 0], zlist[z < 0], 'bo', markersize=2)
 
   def vis_animation(self,x,y,z):
     for i in range(len(x)):
@@ -26,19 +32,39 @@ class visualize_xyz(DaVinci):
       self.add_plotter(visual)
 
   def read(self,path):
-    x = json.load(open(f'./{path}/x.json'))
-    y = json.load(open(f'./{path}/y.json'))
-    z = json.load(open(f'./{path}/z.json'))
+    f = open(path, 'rb')
+    df: pd.DataFrame = pickle.load(f)
+    x, y, z = [], [], []
+    for f in range(int(df['frame'].max()) + 1):
+      x.append(df[df['frame'] == f]['x'].tolist())
+      y.append(df[df['frame'] == f]['y'].tolist())
+      z.append(df[df['frame'] == f]['z'].tolist())
     return x,y,z
+
+  def read_df(self, df):
+    x, y, z = [], [], []
+    for f in range(int(df['frame'].max()) + 1):
+      x.append(df[df['frame'] == f]['x'].tolist())
+      y.append(df[df['frame'] == f]['y'].tolist())
+      z.append(df[df['frame'] == f]['z'].tolist())
+    return x, y, z
+
+  def read_json(self, js):
+    data = np.transpose(np.array(json.load(js)) ,axes=[2,0,1])
+    x = data[0]
+    y = data[1]
+    z = data[2]
+    return x, y, z
+
 
 if __name__ == '__main__':
   vis = visualize_xyz()
-  x_g, y_g, z_g = vis.read('ground_true')
-  max_particle = 20
-  max_frame = 10
+  x_g, y_g, z_g = vis.read('data.pkl')
+  max_particle = 100
+  max_frame = 100
   x_g = np.array(x_g)[0:max_frame, 0:max_particle].tolist()
   y_g = np.array(y_g)[0:max_frame, 0:max_particle].tolist()
-  z_g = (-np.array(z_g)[0:max_frame, 0:max_particle]).tolist()
+  z_g = (np.array(z_g)[0:max_frame, 0:max_particle]).tolist()
   print(x_g,y_g,z_g)
   vis.vis_animation(x_g, y_g, z_g)
   '''def visualzie():
