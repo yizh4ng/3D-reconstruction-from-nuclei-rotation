@@ -30,14 +30,16 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
     current_tensor = 0
 
     for p in range(len(particle_list)):
-      if particle_list[p] not in map(int, frame['particle'].tolist()):
-        print("shit! it disappears")
-        row = pre_exist
+      if particle_list[p] in map(int, frame['particle'].tolist()):
+        print("good, add trainbale Z")
+        row = frame[frame['particle'] == particle_list[p]]
+        pre_exist = row
         assert row.shape[0] == 1
         row = row.iloc[0]
         a = tf.Variable(initial_value=[[[row['x'], row['y']]]],
                         trainable=False, dtype=tf.float64)
-        b = tf.Variable(initial_value=[[[-row['z']]]], trainable=True, dtype=tf.float64)
+        b = tf.Variable(initial_value=[[[row['z']]]], trainable=True,
+                        dtype=tf.float64)
         c = tf.concat([a, b], axis=2)
         if type(current_tensor) == int:
           current_tensor = c
@@ -45,20 +47,21 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
           current_tensor = tf.concat([current_tensor,c], axis=1)
 
       else:
-        print("good, add trainbale Z")
-        row = frame[frame['particle'] == particle_list[p]]
-        pre_exist = row
+
+        print("shit! it disappears")
+        row = pre_exist
         assert row.shape[0] == 1
         row = row.iloc[0]
         if type(current_tensor) == int:
           current_tensor = tf.Variable(initial_value=[[[row['x'], row['y'],
-                                                        row['z']]]],
+                                                        -row['z']]]],
                                        trainable=True, dtype=tf.float64)
         else:
           current_tensor = tf.concat(
             [current_tensor, tf.Variable(initial_value=[[[row['x'], row['y'],
-                                                          row['z']]]],
-                                         trainable=True, dtype=tf.float64)], axis=1)
+                                                          -row['z']]]],
+                                         trainable=True, dtype=tf.float64)],
+                                          axis=1)
 
     if type(tensor) == int:
       tensor = current_tensor
