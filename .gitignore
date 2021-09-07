@@ -1,5 +1,4 @@
 # Ignore data folder and auto generated files
-data
 *.sum
 gather.txt
 checkpoints
