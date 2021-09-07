@@ -12,6 +12,7 @@ def remove_anchors(frame:pd.DataFrame, particles: list):
   return frame[frame['particle'].isin(particles)]
 
 def remove_unlink(frame:pd.DataFrame):
+  frame = remove_anchors(frame, get_particle_list(frame))
   particle_to_remove = []
   appear_time = frame['frame'].max() + 1
   for p in get_particle_list(frame):
