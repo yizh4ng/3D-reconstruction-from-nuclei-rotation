@@ -22,9 +22,9 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
   tensor = 0
 
   for index, row in df.iterrows():
-    #print(row)
+    print(row['frame'])
     if current_particle >= num_anchors:
-      #print("oh, new frame!")
+      print("oh, new frame!")
       current_frame += 1
       current_particle = 0
       if type(tensor) == int:
@@ -35,7 +35,7 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
 
     if int(row['particle']) != particle_list[current_particle]:
       while row['particle'] != particle_list[current_particle]:
-        #print("shit! Particle disappear, add trainable x, y, z")
+        print("shit! Particle disappear, add trainable x, y, z")
         if type(current_tensor) == int:
           current_tensor = tf.Variable(initial_value=[[[row['x'],row['y'],
                                       row['z']]]], trainable=True)
@@ -45,7 +45,7 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
         current_particle += 1
       if int(row['particle']) == particle_list[current_particle] and int(
         row['frame']) == current_frame:
-        #print("good, add a trainable z")
+        print("good, add a trainable z")
 
         a = tf.Variable(initial_value=[[[row['x'], row['y']]]], trainable=False)
         b = tf.Variable(initial_value=[[[row['z']]]], trainable=True)
@@ -59,7 +59,7 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
         current_particle += 1
 
     elif int(row['particle']) == particle_list[current_particle] and int(row['frame']) == current_frame:
-      #print("good, add a trainable z")
+      print("good, add a trainable z")
 
       a = tf.Variable(initial_value=[[[row['x'], row['y']]]], trainable=False)
       b = tf.Variable(initial_value=[[[row['z']]]], trainable=True)
@@ -75,6 +75,7 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
     else:
       print("WTF?", row['particle'], current_particle)
 
+  tensor = tf.concat([tensor, current_tensor], axis=0)
   return tensor
 
 
@@ -87,6 +88,4 @@ if __name__ == '__main__':
   predict_z(df)
   # print(get_particle_list(df)[1])
   tensor = pad_df_to_tensors(df)
-  print(tensor)
-  grad_check = tf.debugging.check_numerics(tensor,
-                                 'check_numerics caught bad gradients')
+  # print(tensor)
