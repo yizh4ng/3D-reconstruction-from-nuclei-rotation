@@ -28,15 +28,18 @@ def loss_function(points):
   # distances: T * N * N
   D = distance(points)
   # pair_dif = T * T * N * N
-  pair_dif = tf.abs((tf.expand_dims(D, 1) - tf.expand_dims(D,0)))
-  output = tf.reduce_sum(pair_dif)
-  return output
+  # dif = tf.abs(D[0:-1] - D[1:])
+  pair_dif = tf.reduce_sum(
+    tf.abs((tf.expand_dims(D, 1) - tf.expand_dims(D,0))))
+  frame_dif = tf.reduce_sum(tf.abs(points[0:-1] - points[1:]))
+  #output = tf.reduce_sum(pair_dif)
+  return pair_dif + 100 * frame_dif
 
 def training(points, sess, step = 9999999):
   loss = loss_function(points)
 
   # Construct an optimizer
-  optimizer = tf.train.GradientDescentOptimizer(5e-9)
+  optimizer = tf.train.GradientDescentOptimizer(5e-5)
   train_step = optimizer.minimize(loss)
 
 
@@ -66,18 +69,20 @@ class DaVinci3D(DaVinci):
     self.points = points
     self.sess = sess
     self.predcit = self.sess.run(tf.transpose(self.points, perm=[0, 2, 1]))
-    self.ground_truth = np.transpose(np.array(self.read('data.pkl')), axes=(1, 0 ,2))
-    self.num_anchors = len(self.ground_truth[0][0])
-    self.objects = np.concatenate([self.predcit, self.ground_truth], axis=2)
+    #self.ground_truth = np.transpose(np.array(self.read('data.pkl')), axes=(1, 0 ,2))
+    #self.num_anchors = len(self.ground_truth[0][0])
+    #self.objects = np.concatenate([self.predcit, self.ground_truth], axis=2)
+    self.objects= self.predcit
 
   def draw_3D(self, x, ax3d: Axes3D):
-    ax3d.scatter(*(x[:, 0:self.num_anchors]), 'ro', s=5)
-    ax3d.scatter(*(x[:, self.num_anchors:]), 'bo', s=5)
-    ax3d.set_xlim(-1.2, 1.2)
-    ax3d.set_ylim(-1.2, 1.2)
-    ax3d.set_zlim(-1.2, 1.2)
+    #ax3d.scatter(*(x[:, 0:self.num_anchors]), 'ro', s=5)
+    #ax3d.scatter(*(x[:, self.num_anchors:]), 'bo', s=5)
+    ax3d.scatter(*x, 'bo', s=5)
+    #ax3d.set_xlim(-1.2, 1.2)
+    #ax3d.set_ylim(-1.2, 1.2)
+    #ax3d.set_zlim(-1.2, 1.2)
 
-  def visualize_training_steps(self, steps=500000):
+  def visualize_training_steps(self, steps=10):
     for i in range(steps):
       console.print_progress(i, steps)
       self.update()
@@ -88,10 +93,11 @@ class DaVinci3D(DaVinci):
 
   def update(self):
     # Busy computing ...
-    training(self.points, self.sess, 10000)
+    training(self.points, self.sess, 1000)
     self.predcit = self.sess.run(tf.transpose(self.points, perm=[0, 2, 1]))
-    self.ground_truth = np.transpose(np.array(self.read('ground_true')), axes=(1, 0 ,2))
-    self.objects = np.concatenate([self.predcit, self.ground_truth], axis=2)
+    #self.ground_truth = np.transpose(np.array(self.read('ground_true')), axes=(1, 0 ,2))
+    #self.objects = np.concatenate([self.predcit, self.ground_truth], axis=2)
+    self.objects= self.predcit
 
   def save_train_result(self):
     file = open('train_result.json','w')
@@ -109,14 +115,15 @@ class DaVinci3D(DaVinci):
     return x, y, z
 
 if __name__ == '__main__':
-  f = open('data.pkl', 'rb')
+  f = open('data_real.pkl', 'rb')
   df = pickle.load(f)
-  df = df[df['z'] > 0]
-  df.drop('z', axis=1, inplace=True)
+  df = df[df['frame']<10]
+  #df = df[df['z'] > 0]
+  #df.drop('z', axis=1, inplace=True)
   df['z'] = 0
   predict_z(df)
   # print(get_particle_list(df)[1])
-  points = pad_df_to_tensors(df)
+  points = pad_df_to_tensors(df, track_disappear_achors=False)
 
   sess = tf.Session()
 
