@@ -1,21 +1,23 @@
 import json
+import pickle
+
 import numpy as np
 
 import pandas as pd
 
-def get_num_anchors(frame,frame_index= 0):
-  return len(frame[frame['frame']==frame_index])
+def get_particle_list(dataframe):
+  return dataframe[dataframe['frame'] == 0 ]['particle'].tolist()
 
-def remove_anchors(frame, max_particle):
-  return frame[frame['particle']<max_particle]
+def remove_anchors(frame:pd.DataFrame, particles: list):
+  return frame[frame['particle'].isin(particles)]
 
-def remove_unlink(frame, max_particle):
+def remove_unlink(frame:pd.DataFrame):
   particle_to_remove = []
-  for frame_index in range(frame['frame'].max()):
-    for particle_index in range(max_particle + 1):
-      if particle_index not in frame[frame['frame'] == frame_index]['particle'].tolist()\
-          and particle_index not in particle_to_remove:
-        particle_to_remove.append(particle_index)
+  appear_time = frame['frame'].max() + 1
+  for p in get_particle_list(frame):
+    if(frame[frame['particle'] == p].shape[0] != appear_time):
+      particle_to_remove.append(p)
+
   frame = frame[~frame['particle'].isin(particle_to_remove)]
   return frame
 
@@ -57,7 +59,12 @@ def read(path):
 
 
 if __name__ == '__main__':
-  x, y = read_x_y_from_pkl('data_3.pkl')
-
+  # x, y = read_x_y_from_pkl('data.pkl')
+  f = open('data.pkl', 'rb')
+  df = pickle.load(f)
+  df = df[df['z'] > 0]
+  print(get_particle_list(df))
+  # print(remove_anchors(dataframe, paticles))
+  print(get_particle_list(remove_unlink(df)))
 
 

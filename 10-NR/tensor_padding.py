@@ -2,6 +2,7 @@ import pickle
 import tensorflow as tf
 import pandas as pd
 from guess_z import predict_z
+from data_cleasing import remove_unlink
 # To convert the df to T * N * 3 size Tensor
 
 def get_particle_list(df: pd.DataFrame):
@@ -14,6 +15,10 @@ def get_particle_list(df: pd.DataFrame):
   return particle_list
 
 def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
+
+  if not track_disappear_achors:
+    df = remove_unlink(df)
+
   particle_list = get_particle_list(df)
   num_anchors = len(particle_list)
   current_particle = 0
@@ -87,5 +92,5 @@ if __name__ == '__main__':
   df['z'] = 0
   predict_z(df)
   # print(get_particle_list(df)[1])
-  tensor = pad_df_to_tensors(df)
+  tensor = pad_df_to_tensors(df, track_disappear_achors=False)
   # print(tensor)
