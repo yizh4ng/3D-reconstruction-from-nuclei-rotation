@@ -45,12 +45,12 @@ if __name__ == '__main__':
   data_dir = r'./data/mar2021'
 
   index =  2
-  diameter =5
+  diameter =11
   minmass = 0.5
 
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
-  tk = TrackerAlpha.read(data_dir+'/simulate_rotation_3.tiff', show_info=True)
+  tk = TrackerAlpha.read('data.tif', show_info=True)
   tk.n_frames = 30
   tk.config_locate(diameter=diameter,minmass=minmass)
   tk.config_link(search_range=10, memory=2)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
   df = tk.show_locations()
   print(df)
   #save dataframe to pkl
-  df.to_pickle("data_3.pkl")
+  df.to_pickle("data_real.pkl")
   #fig, ax = plt.subplots()
 
   #df_0 = df_0[df_0['frame'] == 0]
