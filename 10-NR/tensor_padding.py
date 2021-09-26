@@ -3,8 +3,8 @@ import tensorflow as tf
 import pandas as pd
 from guess_z import predict_z
 from data_cleasing import remove_unlink
-# To convert the df to T * N * 3 size Tensor
 
+# Get all paricles index if it appears once
 def get_particle_list(df: pd.DataFrame):
   particle_list = []
   for index, row in df.iterrows():
@@ -14,8 +14,12 @@ def get_particle_list(df: pd.DataFrame):
   particle_list.sort()
   return particle_list
 
+# To convert the df to T * N * 3 size Tensor
 def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
+
+
   df = df.sort_values(by=['frame', 'particle'])
+  # remove disappearing achors in the dataframe if needed
   if not track_disappear_achors:
     df = remove_unlink(df)
 
@@ -24,6 +28,7 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
 
   tensor = 0
   pre_exist = 0
+  # for each frame, we check the x, y of paricles and add it to the tensor
   for i in range(int(df['frame'].max()) + 1):
     frame = df[df['frame'] == i]
     print(f"new frame!{i}")
@@ -54,12 +59,14 @@ def pad_df_to_tensors(df: pd.DataFrame, track_disappear_achors = True):
         row = row.iloc[0]
         if type(current_tensor) == int:
           current_tensor = tf.Variable(initial_value=[[[row['x'], row['y'],
-                                                        -row['z']]]],
+            -row['z']* tf.random.uniform(shape=(), minval=0.9, maxval=1.1,
+                                         seed=p,dtype=tf.float64)]]],
                                        trainable=True, dtype=tf.float64)
         else:
           current_tensor = tf.concat(
             [current_tensor, tf.Variable(initial_value=[[[row['x'], row['y'],
-                                                          -row['z']]]],
+              -row['z'] * tf.random.uniform(shape=(), minval=0.9, maxval=1.1,
+                                         seed=p,dtype=tf.float64)]]],
                                          trainable=True, dtype=tf.float64)],
                                           axis=1)
 

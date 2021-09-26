@@ -7,7 +7,9 @@ import numpy as np
 class visualize_xyz(DaVinci):
   def __init__(self, size: int = 5, **kwargs):
     # Call parent's constructor
-    super(visualize_xyz, self).__init__('Nuclei Visualizer', height=size, width=size)
+    super(visualize_xyz, self).__init__('Nuclei Visualizer', height=size,
+                                        width=size)
+
     self.keep_3D_view_angle = True
 
   def read_x_y_data(self, df):
@@ -27,11 +29,14 @@ class visualize_xyz(DaVinci):
     self.objects = np.transpose(np.array(data), axes=[0,2,1]).tolist()
 
   def draw_2d(self, x, ax):
-    ax.set_xlim(-1.2, 1.2)
-    ax.set_ylim(-1.2, 1.2)
+    #ax.set_xlim(30, 90)
+    #ax.set_ylim(130, 190)
     ax.scatter(*x, s=5)
 
-  def draw_3d(self, x, ax3d, divide_pos_neg = True):
+  def draw_3d(self, x, ax3d, divide_pos_neg = False):
+    #ax3d.set_xlim(30, 90)
+    #ax3d.set_ylim(130, 190)
+    #ax3d.set_zlim(10, 40)
     if divide_pos_neg:
       x_, y_, z_ = x
       z = np.array(z_)
@@ -45,10 +50,21 @@ class visualize_xyz(DaVinci):
 
 
 if __name__ == '__main__':
-  f = open('data.pkl', 'rb')
+  '''f = open('data_real.pkl', 'rb')
   df: pd.DataFrame = pickle.load(f)
-  df = df[df['z'] > 0]
+  df = df[df['frame'] < 10]
+  from data_cleasing import remove_unlink
+  df = remove_unlink(df)
+  # df = df[df['z'] > 0]
   vis = visualize_xyz()
   vis.read_x_y_data(df)
   vis.add_plotter(vis.draw_2d)
+  vis.show()'''
+  x = json.load(open('./ground_truth/x.json', 'rb'))
+  y = json.load(open('./ground_truth/y.json', 'rb'))
+  z = json.load(open('./ground_truth/z.json', 'rb'))
+  vis = visualize_xyz()
+  vis.objects = np.expand_dims(np.array([x[0], y[0], z[0]]),axis=0)
+  print(vis.objects.shape)
+  vis.add_plotter(vis.draw_3d)
   vis.show()

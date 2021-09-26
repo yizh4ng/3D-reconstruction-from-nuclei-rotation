@@ -60,7 +60,7 @@ if __name__ == '__main__':
   df = tk.show_locations()
   print(df)
   #save dataframe to pkl
-  df.to_pickle("data_real.pkl")
+  # df.to_pickle("data_real.pkl")
   #fig, ax = plt.subplots()
 
   #df_0 = df_0[df_0['frame'] == 0]

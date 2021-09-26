@@ -123,7 +123,7 @@ if __name__ == '__main__':
   df['z'] = 0
   predict_z(df)
   # print(get_particle_list(df)[1])
-  points = pad_df_to_tensors(df, track_disappear_achors=False)
+  points = pad_df_to_tensors(df, track_disappear_achors=True)
 
   sess = tf.Session()
 

@@ -46,10 +46,10 @@ def predict_z(df:pd.DataFrame):
         tolist()
 if __name__ == '__main__':
 
-  f = open('data.pkl', 'rb')
+  f = open('data_real.pkl', 'rb')
   df:pd.DataFrame = pickle.load(f)
-  df = df[ df['z'] > 0 ]
-  df.drop('z', axis=1,inplace=True)
+  # df = df[ df['z'] > 0 ]
+  # df.drop('z', axis=1,inplace=True)
   df['z'] = 0
   predict_z(df)
 
