@@ -9,12 +9,6 @@ def equations(v:np.array, P):
   l = int(len(P)/2)
   equations = []
   v_ = np.reshape(v, (3,3))
-  '''equations.append(LA.norm(np.matmul(np.array([1, 0, 0]), v_)) - 1)
-  for row in P[1:l]:
-    equations.append(LA.norm(np.matmul(row, v_))-1)
-  equations.append(LA.norm(np.matmul(np.array([0, 1, 0]), v_)) - 1)
-  for row in P[l+1:]:
-    equations.append(LA.norm(np.matmul(row, v_))-1)'''
   for row in P:
     equations.append(LA.norm(np.matmul(row, v_)) - 1)
 
@@ -24,8 +18,8 @@ def equations(v:np.array, P):
 
   return equations
 
-def solve_x_y(x,y, P, E):
-  P, E, Q = select_3_most_SV(*SV_D(build_matrix(x, y)))
+def solve_x_y(x,y, P, E, Q):
+  # P, E, Q = select_3_most_SV(*SV_D(build_matrix(x, y)))
   x = np.zeros(9)
   sol = leastsq(equations, x, args=np.matmul(P, np.sqrt(E)))
                 #args=P)

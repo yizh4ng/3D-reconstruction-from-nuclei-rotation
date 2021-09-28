@@ -1,7 +1,7 @@
 import numpy as np
 import json
 from .build_matrix import build_matrix
-
+from scipy import linalg
 def SV_D(M:np.array):
   return np.linalg.svd(M)
 
