@@ -68,14 +68,16 @@ if __name__ == '__main__':
   '''x = json.load(open('./ground_truth/x.json'))
   y = json.load(open('./ground_truth/y.json'))
   M = math_utili.build_matrix.build_matrix(x,y)
-  s=SVD_reconstruct(M)
+  r, s=SVD_reconstruct(M)
+  print(np.array(s).shape)
   vis = visualize_xyz()
   vis.objects = np.array(s)
   vis.add_plotter(vis.draw_3d)
   vis.show()'''
   df = pickle.load(open("./data_real.pkl", 'rb'))
   df1 = pickle.load(open("./data.pkl", 'rb'))
-  x1, y1 = math_utili.build_matrix.build_matrix_from_df(df1)
+  x1, y1 = math_utili.build_matrix.build_matrix_from_df(df)
+  x1 =math_utili.build_matrix.data_cleasing(x1)
   x, y = math_utili.build_matrix.build_matrix_from_df(df)
   x = math_utili.build_matrix.data_cleasing(x)
   y = math_utili.build_matrix.data_cleasing(y)
@@ -86,6 +88,14 @@ if __name__ == '__main__':
   for i in range(len(nan_location)):
     reconstruct_missing(x, y, nan_location[i], sub_matrix[i])
   #a= math_utili.build_matrix.get_notNAN_row_and_col(x,0,9)
+  M = math_utili.build_matrix.build_matrix(x, y)
+  r, s = SVD_reconstruct(M)
+  vis = visualize_xyz()
+  vis.objects = np.array(s)
+  vis.add_plotter(vis.draw_3d)
+  vis.show()
+
+
   print("finish")
   # print(math_utili.build_matrix.find_submatrix(NAN_location))
   # print(F_P_comb.shape)
