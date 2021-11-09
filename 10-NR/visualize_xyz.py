@@ -4,6 +4,7 @@ import pickle
 from lambo.gui.vinci.vinci import DaVinci
 import pandas as pd
 import numpy as np
+from read_pickle import read_to_xyz
 class visualize_xyz(DaVinci):
   def __init__(self, size: int = 5, **kwargs):
     # Call parent's constructor
@@ -31,12 +32,13 @@ class visualize_xyz(DaVinci):
   def draw_2d(self, x, ax):
     #ax.set_xlim(30, 90)
     #ax.set_ylim(130, 190)
+    x = np.array(x)[:2]
     ax.scatter(*x, s=5)
 
   def draw_3d(self, x, ax3d, divide_pos_neg = False):
-    #ax3d.set_xlim(30, 90)
-    #ax3d.set_ylim(130, 190)
-    #ax3d.set_zlim(10, 40)
+    # ax3d.set_xlim(-1, 1)
+    # ax3d.set_ylim(-1, 1)
+    # ax3d.set_zlim(-1, 1)
     if divide_pos_neg:
       x_, y_, z_ = x
       z = np.array(z_)
@@ -63,6 +65,7 @@ if __name__ == '__main__':
   x = json.load(open('./ground_truth/x.json', 'rb'))
   y = json.load(open('./ground_truth/y.json', 'rb'))
   z = json.load(open('./ground_truth/z.json', 'rb'))
+  x, y, z = read_to_xyz('./data_Dai.pkl')
   vis = visualize_xyz()
   vis.objects = np.expand_dims(np.array([x[0], y[0], z[0]]),axis=0)
   print(vis.objects.shape)

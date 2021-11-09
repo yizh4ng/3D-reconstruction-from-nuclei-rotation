@@ -51,16 +51,16 @@ if __name__ == '__main__':
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
   tk = TrackerAlpha.read('data.tif', show_info=True)
-  tk.n_frames = 30
+  # tk.n_frames = 30
   tk.config_locate(diameter=diameter,minmass=minmass)
-  tk.config_link(search_range=10, memory=2)
+  tk.config_link(search_range=10, memory=15)
   tk.add_plotter(tk.imshow)
   tk.add_plotter(tk.show_locations)
 
   df = tk.show_locations()
   print(df)
   #save dataframe to pkl
-  # df.to_pickle("data_real.pkl")
+  df.to_pickle("data_real_all_m15.pkl")
   #fig, ax = plt.subplots()
 
   #df_0 = df_0[df_0['frame'] == 0]

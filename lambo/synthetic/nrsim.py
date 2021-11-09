@@ -34,7 +34,7 @@ class NRSim(DaVinci):
     self.radius = size
     self.anchors = pd.DataFrame({'x':[], 'y':[], 'frame':[], 'particle':[]})
     #initialize the nuleus positions
-    self.init_nucleus(5,30)
+    self.init_nucleus(1,30)
     #self.add_plotter(self.visualize_nucleus)
 
   def init_nucleus(self, radius:int, number_anchors:int,**kwargs):
@@ -47,7 +47,7 @@ class NRSim(DaVinci):
     x = np.cos(u) * np.sin(v)
     y = np.sin(u) * np.sin(v)
     z = np.cos(v)
-    for i in range(0, 45):
+    for i in range(0, 180):
       pos =  Rx(i * m.pi/360) @ np.array((x,y,z)).tolist()
       for p in range(num_anchors):
         x_, y_, z_ = pos[0][p], pos[1][p], pos[2][p]
@@ -88,21 +88,20 @@ class NRSim(DaVinci):
 
   # add rotation frame to davinci layers
   def rotate(self):
-    for ang in range(0, 45):
+    for ang in range(0, 180):
       def f(ax3d, angl = ang):
-        self.visualiza_nucleus_no_back(ax3d, angle=angl)
-        # self.visualize_nucleus(ax3d, angle=angl)
+        # self.visualiza_nucleus_no_back(ax3d, angle=angl)
+        self.visualize_nucleus(ax3d, angle=angl)
       self.add_plotter(f)
-
   def save_anchors(self):
-   self.anchors.to_pickle('data.pkl')
+   self.anchors.to_pickle('data_Dai_360.pkl')
 
 if __name__ == '__main__':
   ns = NRSim()
   #print(np.array(ns.anchors)[:,1,:].shape)
   ns.save_anchors()
   ns.rotate()
-  #ns.record()
+  # ns.record()
   '''def vis():
     ns.visualize_nucleus(ns.axes3d,angle=30)
   ns.add_plotter(vis)'''
