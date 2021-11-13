@@ -98,6 +98,7 @@ class Rotating_Cell():
           p2[j] = self.frames[i].locale_r @ (p1[j] - self.frames[i].center_position) + \
                   self.frames[i + 1].center_position
           self.frames[i + 1].set_point(p2[j], j)
+
         for k in range(len(p1)):
           if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
             if np.linalg.norm(p1[j] - p2[k]) < 5:
@@ -105,7 +106,6 @@ class Rotating_Cell():
                 self.frames[l].set_point(self.frames[l].points[k], j)
               for l in range(0, len(self.frames)):
                 self.frames[l].set_point(np.array([np.nan, np.nan, np.nan]), k)
-                # self.frames[l][k] = np.array([np.nan, np.nan, np.nan])
 
   def guess_missing_back(self):
     for i in range(len(self.frames) - 1, 0, -1):
