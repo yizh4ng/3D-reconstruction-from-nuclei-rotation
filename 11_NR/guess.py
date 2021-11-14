@@ -7,9 +7,12 @@ class Guesser():
     pass
 
   @classmethod
-  def guess_center(cls, x:np.ndarray, y:np.ndarray):
+  def guess_center(cls, x:np.array, y:np.array):
     center = []
+    # print(x.shape)
     for i in range(len(x)):
+      assert np.isnan(x[i]).all() == False
+      assert np.isnan(y[i]).all() == False
       center.append([np.nanmean(x[i]), np.nanmean(y[i])])
     return center
 
@@ -40,8 +43,8 @@ class Guesser():
 
   @classmethod
   # x, y f x p
-  def delete_outlier(cls, x:np.ndarray, y:np.ndarray, R, R_mean):
-    del_para = 1.7
+  def delete_outlier(cls, x:np.ndarray, y:np.ndarray, R, R_mean, de_para = 1.7):
+    del_para = de_para
     particle_to_delete = []
     for i in range(len(R)):
       for j in range(len(R[i])):

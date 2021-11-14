@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from roma import console
 
 from guess import Guesser
 from frame import Frame
@@ -7,17 +8,23 @@ from frame import Frame
 
 
 class Rotating_Cell():
-  def __init__(self, df: pd.DataFrame):
+  def __init__(self, df: pd.DataFrame, del_para = 1.7,
+               iteratively_op_radius= True, iterative_times = 2):
     self.data_frame = df
     self.frame_list = (list(set(list(map(int, df['frame'].values)))))
     self.particle_list = (list(set(list(map(int, df['particle'].values)))))
     self.x, self.y = self.get_xy_position()
+    self.del_para = del_para
+    self.iterative = iteratively_op_radius
+    self.iterative_times = iterative_times
 
   def data_cleasing(self, x: np.array):
     # for every frame, at least k particle
     x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 3), axis=0)
     # for very particle, at least k frames
     x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 15), axis=0).T
+
+    assert len(x[0]) > 2
     return x
 
   def get_xy_position(self):
@@ -26,8 +33,10 @@ class Rotating_Cell():
     frame_list = self.frame_list
     particle_list = self.particle_list
     # for i in range(int(df['frame'].max()) + 1):
+    console.show_status('Loading DataFrame...')
+
     for i in frame_list:
-      print(f'read {i} th frame')
+      console.print_progress(i, total=len(frame_list))
       x_ = np.array([])
       y_ = np.array([])
       for j in particle_list:
@@ -47,6 +56,8 @@ class Rotating_Cell():
       y.append(y_)
     x = np.array(x)
     y = np.array(y)
+
+    console.show_status('Finish Reading DataFrame.')
     return x, y
 
   def guess_radius(self):
@@ -55,10 +66,20 @@ class Rotating_Cell():
     # F x 2 x (1 + P)
     R, R_mean = Guesser.guess_radius(self.x, self.y, center)
     self.x, self.y, flag = Guesser.delete_outlier(self.x, self.y, R, R_mean)
-    while flag:
-      center = Guesser.guess_center(self.x, self.y)
-      R, R_mean = Guesser.guess_radius(self.x, self.y, center)
-      self.x, self.y, flag = Guesser.delete_outlier(self.x, self.y, R, R_mean)
+    iter = 1
+    if self.iterative:
+        while flag and iter <= self.iterative_times:
+          print(f'{iter}th iteration on optimizing radius')
+
+          center = Guesser.guess_center(self.x, self.y)
+          R, R_mean = Guesser.guess_radius(self.x, self.y, center)
+          self.x, self.y, flag = Guesser.delete_outlier(self.x, self.y, R, R_mean)
+          self.x = self.data_cleasing(self.x)
+          self.y = self.data_cleasing(self.y)
+          assert (len(self.x) != 0)
+          iter += 1
+
+    center = Guesser.guess_center(self.x, self.y)
     self.center = Guesser.smooth_center(center)
     R, R_mean = Guesser.guess_radius(self.x, self.y, center)
     self.radius = R
@@ -72,7 +93,7 @@ class Rotating_Cell():
 
   def guess_rotation(self):
     self.rotation = []
-    for i in range(len(self.frame_list) - 1):
+    for i in range(len(self.frames) - 1):
       self.rotation.append(Guesser.guess_rotation(self.frames[i].points,
                                                   self.frames[i + 1].points,
                                                   self.frames[i].center,
@@ -130,13 +151,16 @@ class Rotating_Cell():
     self.y = self.data_cleasing(self.y)
     self.x = Guesser.smooth_center(self.x)
     self.y = Guesser.smooth_center(self.y)
+    self.x = self.data_cleasing(self.x)
+    self.y = self.data_cleasing(self.y)
     self.frames = []
     self.guess_radius()
-    self.radius = 1.7 * self.mean_radius
+    self.radius = self.del_para * self.mean_radius
     self.guess_depth()
     for i in range(len(self.x)):
       self.frames.append(
         Frame(self.x[i], self.y[i], self.z[i], self.center[i], self.radius))
+    assert len(self.frames) > 0
     self.guess_rotation()
     self.attach_rotation()
     self.guess_missing()

@@ -34,6 +34,7 @@ def rigid_transform_3D(A, B, center_A, center_B):
     #    raise ValueError("rank of H = {}, expecting 3".format(linalg.matrix_rank(H)))
 
     # find rotation
+    assert np.isnan(H).any() == False
     U, S, Vt = np.linalg.svd(H)
     R = Vt.T @ U.T
 
