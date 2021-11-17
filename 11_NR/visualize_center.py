@@ -1,9 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from roma import console
 from lambo import DaVinci
+from frame import Frame, Frames
+
 from rotating_cell import Rotating_Cell
-from frame import Frame
+from optimize import training, Trainer
+
 
 class Cell_Visualizer(DaVinci):
   def __init__(self, cell: Rotating_Cell):
@@ -63,3 +67,15 @@ class Cell_Visualizer(DaVinci):
       ax3d.plot3D([x_T[i][0],0],
                   [x_T[i][1],0],
                   zs=[x_T[i][2],0])
+
+  def train(self, steps=2):
+    for i in range(steps):
+      console.print_progress(i, steps)
+      self.update()
+      self.refresh()
+
+  def update(self):
+    from tframe import tf
+    # Busy computing ...
+
+    self.objects = Trainer.train(self.objects)

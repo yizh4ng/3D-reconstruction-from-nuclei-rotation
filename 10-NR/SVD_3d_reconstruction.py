@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
   df = pickle.load(open("./data_real_all.pkl", 'rb'))
   print(df['frame'].max())
-  df:DataFrame= df[(df['frame'] >= 85) & (df['frame'] <= 114) & (df['particle'] != 14)# 65 ~ 109
+  df:DataFrame= df[(df['frame'] >= 85) & (df['frame'] <= 105) & (df['particle'] != 14)# 65 ~ 109
                    & (df['particle'] != 47)]
   df = df.sort_values(['frame', 'particle'], ascending=[True, True])
   # df1 = pickle.load(open("./data.pkl", 'rb'))

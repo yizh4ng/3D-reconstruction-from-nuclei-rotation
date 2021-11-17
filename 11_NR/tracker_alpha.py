@@ -51,6 +51,7 @@ if __name__ == '__main__':
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
   file_name = 'data_8'
+  save = False
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 30
   tk.config_locate(diameter=diameter,minmass=minmass)
@@ -61,7 +62,8 @@ if __name__ == '__main__':
   df = tk.show_locations()
   print(df)
   #save dataframe to pkl
-  df.to_pickle(f"./pkl/{file_name}.pkl")
+  if save:
+    df.to_pickle(f"./pkl/{file_name}.pkl")
   #fig, ax = plt.subplots()
 
   #df_0 = df_0[df_0['frame'] == 0]

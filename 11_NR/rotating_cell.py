@@ -3,8 +3,7 @@ import numpy as np
 from roma import console
 
 from guess import Guesser
-from frame import Frame
-
+from frame import Frame, Frames
 
 
 class Rotating_Cell():
@@ -165,6 +164,7 @@ class Rotating_Cell():
     self.attach_rotation()
     self.guess_missing()
     self.guess_missing_back()
+    Frames.cleasing(self.frames)
 
 if __name__ == '__main__':
   pass

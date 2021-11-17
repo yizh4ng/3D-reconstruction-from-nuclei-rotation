@@ -8,7 +8,7 @@ from visualize_center import Cell_Visualizer
 
 if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
-  df = pd.read_pickle('./pkl/data_8.pkl')
+  df = pd.read_pickle('./pkl/adam.pkl')
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 114) & (
   #     df['particle'] != 14)  # 65 ~ 109
   #         & (df['particle'] != 47)]
@@ -23,10 +23,9 @@ if __name__ == '__main__':
   y = np.expand_dims(cell.y, axis=1)
   xy = np.concatenate((x, y), axis = 1)
   center_ = np.expand_dims(cell.center, axis = -1)
-  # xy_with_center = np.concatenate((center_, xy), axis = -1)
-  points = cell.frames[0].points
+  xy_with_center = np.concatenate((center_, xy), axis = -1)
   cv = Cell_Visualizer(cell)
-  # cv.objects = xy_with_center
+  # cv.train()
   cv.add_plotter(cv.draw_frame_2d)
   cv.add_plotter(cv.draw_frame_3d)
   cv.add_plotter(cv.draw_rotation)

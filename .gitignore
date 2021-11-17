@@ -5,6 +5,7 @@ checkpoints
 *.txt
 *mascot*.py
 *.zip
+*.gif
 
 # Ignore PyCharm files
 .idea/

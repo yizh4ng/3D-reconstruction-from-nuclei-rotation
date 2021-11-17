@@ -1,6 +1,26 @@
 import numpy as np
 
+class Frames():
+  def __init__(self, frames_: list):
+    self.frames = frames_
 
+  # f x p x 3
+  @property
+  def points(self):
+    points = []
+    for frame in self.frames:
+      points.append(frame.points)
+    return np.array(points)
+
+  # f x p x 3
+  def set_points(self, points):
+    for i, frame in enumerate(self.frames):
+      frame.set_points(points[i])
+
+  @classmethod
+  def cleasing(cls, frames:list):
+    for frame in frames:
+      frame.delete_nan()
 
 class Frame():
   def __init__(self, x, y, z, center, radius):
@@ -38,3 +58,7 @@ class Frame():
     self.y[i] = np.transpose(point)[1]
     self.z[i] = np.transpose(point)[2]
 
+  def delete_nan(self):
+    self.x = self.x[~np.isnan(self.x)]
+    self.y = self.y[~np.isnan(self.y)]
+    self.z = self.z[~np.isnan(self.z)]
