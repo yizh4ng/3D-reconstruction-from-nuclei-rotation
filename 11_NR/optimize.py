@@ -1,4 +1,5 @@
 import json
+import pickle
 
 from roma import console
 
@@ -10,6 +11,8 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from frame import Frames
 from lambo import DaVinci
+
+from construct_tensor import frames_to_tensors
 
 # A is an T * N * 3 size tenor out put the sum of distances of each pairs
 # output T * N * N
@@ -30,15 +33,15 @@ def loss_function(points):
   output = tf.reduce_sum(pair_dif)
   return output
 
-def training(points, sess, step = 2):
+def training(points, sess, step = 10000):
 
   loss = loss_function(points)
 
   # Construct an optimizer
-  optimizer = tf.train.GradientDescentOptimizer(5e-9)
+  optimizer = tf.train.GradientDescentOptimizer(5e-6)
   train_step = optimizer.minimize(loss)
 
-
+  val_loss = 0
   for t in range(step):
     sess.run(train_step)
     val_loss = sess.run(loss)
@@ -54,28 +57,38 @@ def training(points, sess, step = 2):
       # with open('./y.json', 'w') as f:
       #   json.dump(sess.run(y).tolist(), f)
       break
-    if t % 10000 == 0:
+    if t % 1000 == 0:
       print('loss = {}'.format(val_loss))
       pre_value_loss = val_loss
+  return val_loss
 
 class Trainer():
   def __init__(self):
     pass
 
   @classmethod
-  def train(cls, frames:list):
-    frames_ = Frames(frames)
-    points = frames_.points
-    x = tf.constant(points[:, :, 0])
-    y = tf.constant(points[:, :, 1])
-    print(points[:, :, 2])
-    z = tf.Variable(initial_value=points[:, :, 2], trainable=True)
-    sess = tf.Session()
+  def train(cls, cell):
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+
+    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+    # sess = tf.Session()
+    frames_ = Frames(cell.frames)
+    # points = frames_.points
+    # x = tf.expand_dims(tf.constant(points[:,:,0]), -1 )
+    # y = tf.expand_dims(tf.constant(points[:,:,1]), -1)
+    # z = tf.expand_dims(tf.Variable(
+    #   initial_value= points[:,:,2], trainable=True), -1)
+    points = frames_to_tensors(cell.frames)
     sess.run(tf.global_variables_initializer())
-    points = tf.concat([x, y, z], axis=-1)
-    training(points, sess)
+    # points = tf.concat([x, y, z], axis=-1)
+    # points = tf.transpose(points, [1, 2, 0])
+    val_loss = training(points, sess)
     predcit = sess.run(points)
+    # print(predcit)
     frames_.set_points(predcit)
+    cell.frames = frames_.frames
+    with open(f'./{val_loss}.pkl', 'wb+') as f:
+      pickle.dump(cell, f)
     return frames_.frames
 
 if __name__ == '__main__':

@@ -1,14 +1,19 @@
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.insert(0, "../../lambai")
+sys.path.insert(0, '../roma')
 from roma import console
 from lambo import DaVinci
 from frame import Frame, Frames
 
+from tframe import tf
 from rotating_cell import Rotating_Cell
-from optimize import training, Trainer
-
-
+from optimize import training
+from construct_tensor import frames_to_tensors
+sys.path.insert(0, "./src")
 class Cell_Visualizer(DaVinci):
   def __init__(self, cell: Rotating_Cell):
     # Call parent's constructor
@@ -24,6 +29,7 @@ class Cell_Visualizer(DaVinci):
     # self.axes.set_xlim(x_low, x_max)
     # self.axes.set_ylim(y_low, y_max)
     self.objects = cell.frames
+    self.cell = cell
 
   def draw_2d_with_center(self, x: np.ndarray, ax):
     ax.scatter(*x, s=5, c='blue')
@@ -33,8 +39,12 @@ class Cell_Visualizer(DaVinci):
 
   def draw_frame_2d(self, x, ax):
     assert isinstance(x, Frame)
-
-    ax.scatter(x.x, x.y, s=5, c='blue')
+    for i in range(len(x.x)):
+      if x.missing[i] == 1:
+        ax.scatter(x.x[i], x.y[i], s=5, c='yellow')
+      else:
+        ax.scatter(x.x[i], x.y[i], s=5, c='blue')
+    # ax.scatter(x.x, x.y, s=5, c='blue')
     ax.scatter([x.center[0]], [x.center[1]], s=10, c='red')
     cir = plt.Circle((x.center[0], x.center[1]), x.radius, color='r', fill=False)
     ax.add_patch(cir)
@@ -44,8 +54,13 @@ class Cell_Visualizer(DaVinci):
 
   def draw_frame_3d(self, x, ax3d):
     assert isinstance(x, Frame)
-
-    ax3d.scatter(x.x, x.y, x.z, s=20, c = 'c')
+    assert len(x.missing) == len(x.x)
+    for i in range(len(x.x)):
+      if x.missing[i] == 1:
+        ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='yellow')
+      else:
+        ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='blue')
+    # ax3d.scatter(x.x, x.y, x.z, s=20, c = 'c')
     ax3d.scatter([x.center[0]], [x.center[1]], [0], s=10, c='red')
     width = max(self.x_max - self.x_low, self.y_max - self.y_low)
     ax3d.set_xlim(self.x_low - 0.1 * width, self.x_low + 1.1 * width)
@@ -68,14 +83,64 @@ class Cell_Visualizer(DaVinci):
                   [x_T[i][1],0],
                   zs=[x_T[i][2],0])
 
-  def train(self, steps=2):
+  def train(self, steps=1):
+    self.sess = tf.Session()
+    console.show_status('Start training...')
     for i in range(steps):
-      console.print_progress(i, steps)
+      console.print_progress(i, total=steps)
       self.update()
       self.refresh()
 
-  def update(self):
-    from tframe import tf
-    # Busy computing ...
+    console.show_status('Finish training')
 
-    self.objects = Trainer.train(self.objects)
+  def update(self):
+    # Busy computing ...
+    frames_ = Frames(self.objects)
+    # points = frames_.points
+    # x = tf.expand_dims(tf.constant(points[:,:,0]), -1 )
+    # y = tf.expand_dims(tf.constant(points[:,:,1]), -1)
+    # z = tf.expand_dims(tf.Variable(
+    #   initial_value= points[:,:,2], trainable=True), -1)
+    points = frames_to_tensors(self.objects)
+    self.sess.run(tf.global_variables_initializer())
+    # points = tf.concat([x, y, z], axis=-1)
+    # points = tf.transpose(points, [1, 2, 0])
+    val_loss = training(points, self.sess)
+    predcit = self.sess.run(points)
+    # print(predcit)
+    frames_.set_points(predcit)
+    self.objects = frames_.frames
+    self.cell.frames = self.objects
+    with open(f'./{val_loss}.pkl', 'wb+') as f:
+      pickle.dump(self.cell, f)
+    # points(len(frames_.frames))
+
+if __name__ == '__main__':
+  data = 'adam'
+  save = True
+  with open(f'./pkl/opt/adam/adam_176.pkl', 'rb') as f:
+    cell = pickle.load(f)
+  cv = Cell_Visualizer(cell)
+  # cv.train()
+  cv.add_plotter(cv.draw_frame_2d)
+  cv.add_plotter(cv.draw_frame_3d)
+  cv.add_plotter(cv.draw_rotation)
+  cv.show()
+  if save:
+    dict = {}
+    dict['radius'] = cell.radius
+    dict['center'] = cell.center
+    x, y, z, center = [], [], [], []
+    for f in cell.frames:
+      x.append(f.x.tolist())
+      y.append(f.y.tolist())
+      z.append(f.z.tolist())
+      center.append(f.center)
+    dict['x'] = x
+    dict['y'] = y
+    dict['z'] = z
+    dict['center'] = center
+    with open(f'./results/{data}/cell_176.pkl', 'wb+') as f:
+      pickle.dump(dict, f)
+    # with open(f'./cell.pkl', 'wb+') as f:
+    #   pickle.dump(cell, f)

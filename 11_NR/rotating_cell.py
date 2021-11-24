@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import sys
+sys.path.insert(0, "../../lambai")
+sys.path.insert(0, '../roma')
 from roma import console
 
 from guess import Guesser
@@ -16,13 +19,14 @@ class Rotating_Cell():
     self.del_para = del_para
     self.iterative = iteratively_op_radius
     self.iterative_times = iterative_times
+    self.missing = np.zeros(self.x.shape)
 
   def data_cleasing(self, x: np.array):
     # for every frame, at least k particle
     x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 3), axis=0)
     # for very particle, at least k frames
     x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 15), axis=0).T
-
+    self.missing = np.zeros(x.shape)
     assert len(x[0]) > 2
     return x
 
@@ -109,6 +113,7 @@ class Rotating_Cell():
 
   def guess_missing(self):
     # for evrey frame
+    points_to_delete = []
     for i in range(len(self.frames) - 1):
       p1 = self.frames[i].points
       p2 = self.frames[i + 1].points
@@ -118,14 +123,26 @@ class Rotating_Cell():
           p2[j] = self.frames[i].locale_r @ (p1[j] - self.frames[i].center_position) + \
                   self.frames[i + 1].center_position
           self.frames[i + 1].set_point(p2[j], j)
+          self.missing[i + 1][j] = 1
 
-        for k in range(len(p1)):
+        for k in range(j + 1, len(p1)):
           if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
             if np.linalg.norm(p1[j] - p2[k]) < 5:
-              for l in range(i, len(self.frames)):
+
+              for l in range(i + 1, len(self.frames)):
                 self.frames[l].set_point(self.frames[l].points[k], j)
+                self.missing[l][j] = self.missing[l][k]
               for l in range(0, len(self.frames)):
                 self.frames[l].set_point(np.array([np.nan, np.nan, np.nan]), k)
+              points_to_delete.append(k)
+
+    points_to_delete = list(set(points_to_delete))
+    # print(points_to_delete)
+    for l in range(0, len(self.frames)):
+      self.frames[l].del_points(points_to_delete)
+    self.missing = np.delete(self.missing, points_to_delete, axis=1)
+    # points = Frames(self.frames).points[:,:,0]
+    assert self.missing.shape ==  (len(self.frames), len(self.frames[0].points))
 
   def guess_missing_back(self):
     for i in range(len(self.frames) - 1, 0, -1):
@@ -137,6 +154,8 @@ class Rotating_Cell():
           p2[j] = self.frames[i - 1].locale_r.T @ (
                 p1[j] - self.frames[i].center_position) + \
                   self.frames[i - 1].center_position
+
+          self.missing[i - 1][j] = 1
         # for k in range(len(p1)):
         #   if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
         #     if np.linalg.norm(p1[j] - p2[k]) < 5:
@@ -144,6 +163,14 @@ class Rotating_Cell():
         #       p2[k] = np.array([np.nan, np.nan, np.nan])
       self.frames[i - 1].set_points(p2)
 
+    # points = Frames(self.frames).points[:,:,0]
+    assert np.isnan(Frames(self.frames).points).any() == False
+
+  def attaching_missing(self):
+    assert self.missing.shape ==  (len(self.frames), len(self.frames[0].points))
+    for i in range(len(self.missing)):
+      for j in range(len(self.missing[0])):
+        self.frames[i].missing[j] = self.missing[i][j]
 
   def run(self):
     self.x = self.data_cleasing(self.x)
@@ -164,7 +191,7 @@ class Rotating_Cell():
     self.attach_rotation()
     self.guess_missing()
     self.guess_missing_back()
-    Frames.cleasing(self.frames)
+    self.attaching_missing()
 
 if __name__ == '__main__':
   pass

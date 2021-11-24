@@ -30,6 +30,8 @@ class Frame():
     self.center = center #(2,)
     self.radius = radius # float
 
+    self.missing = np.zeros(len(self.x))
+
   # p * 3
   @property
   def points(self):
@@ -51,6 +53,12 @@ class Frame():
     self.x = np.transpose(points)[0]
     self.y = np.transpose(points)[1]
     self.z = np.transpose(points)[2]
+
+  def del_points(self, i):
+    self.x = np.delete(self.x, i)
+    self.y = np.delete(self.y, i)
+    self.z = np.delete(self.z, i)
+    self.missing = np.delete(self.missing, i)
 
   # point 1 x 3
   def set_point(self, point, i):

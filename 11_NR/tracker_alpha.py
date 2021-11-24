@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
-  file_name = 'data_8'
+  file_name = 'adam'
   save = False
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 30
