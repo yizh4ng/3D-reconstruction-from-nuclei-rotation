@@ -41,7 +41,7 @@ class Cell_Visualizer(DaVinci):
     assert isinstance(x, Frame)
     for i in range(len(x.x)):
       if x.missing[i] == 1:
-        ax.scatter(x.x[i], x.y[i], s=5, c='yellow')
+        ax.scatter(x.x[i], x.y[i], s=5, c='orange')
       else:
         ax.scatter(x.x[i], x.y[i], s=5, c='blue')
     # ax.scatter(x.x, x.y, s=5, c='blue')
@@ -57,7 +57,7 @@ class Cell_Visualizer(DaVinci):
     assert len(x.missing) == len(x.x)
     for i in range(len(x.x)):
       if x.missing[i] == 1:
-        ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='yellow')
+        ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='orange')
       else:
         ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='blue')
     # ax3d.scatter(x.x, x.y, x.z, s=20, c = 'c')
@@ -72,7 +72,7 @@ class Cell_Visualizer(DaVinci):
     x_ = 0.98 * x.radius * np.cos(u) * np.sin(v) + x.center[0]
     y_ = 0.98 * x.radius * np.sin(u) * np.sin(v) + x.center[1]
     z_ = 0.98 * x.radius * np.cos(v)
-    ax3d.plot_surface(x_, y_, z_, cmap=plt.cm.YlGnBu_r, alpha=0.2, linewidth=0,
+    ax3d.plot_surface(x_, y_, z_, cmap=plt.cm.YlGnBu_r, alpha=0.1, linewidth=0,
                       rstride=1, cstride=1,)
 
   def draw_rotation(self, x, ax3d):
@@ -118,7 +118,7 @@ class Cell_Visualizer(DaVinci):
 if __name__ == '__main__':
   data = 'adam'
   save = True
-  with open(f'./pkl/opt/adam/adam_176.pkl', 'rb') as f:
+  with open(f'./cell_class/adam_op.pkl', 'rb') as f:
     cell = pickle.load(f)
   cv = Cell_Visualizer(cell)
   # cv.train()
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     dict['y'] = y
     dict['z'] = z
     dict['center'] = center
-    with open(f'./results/{data}/cell_176.pkl', 'wb+') as f:
+    with open(f'./results/{data}/cell_op.pkl', 'wb+') as f:
       pickle.dump(dict, f)
     # with open(f'./cell.pkl', 'wb+') as f:
     #   pickle.dump(cell, f)

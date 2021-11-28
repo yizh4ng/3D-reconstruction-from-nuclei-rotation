@@ -119,15 +119,22 @@ class Rotating_Cell():
       p2 = self.frames[i + 1].points
       # for every point
       for j in range(len(p1)):
+        if ~np.isnan(p1[j]).any() and ~np.isnan(p2[j]).any():
+          if np.linalg.norm(p1[j] - p2[j]) > 5:
+            self.frames[i + 1].set_point(np.array([np.nan, np.nan, np.nan]), j)
+            p2 = self.frames[i + 1].points
+            self.missing[i + 1][j] = 1
+
         if ~np.isnan(p1[j]).any() and np.isnan(p2[j]).any():
           p2[j] = self.frames[i].locale_r @ (p1[j] - self.frames[i].center_position) + \
                   self.frames[i + 1].center_position
           self.frames[i + 1].set_point(p2[j], j)
           self.missing[i + 1][j] = 1
 
+
         for k in range(j + 1, len(p1)):
           if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
-            if np.linalg.norm(p1[j] - p2[k]) < 5:
+            if np.linalg.norm(p1[j] - p2[k]) < 2:
 
               for l in range(i + 1, len(self.frames)):
                 self.frames[l].set_point(self.frames[l].points[k], j)
@@ -194,4 +201,5 @@ class Rotating_Cell():
     self.attaching_missing()
 
 if __name__ == '__main__':
+  np.expand_dims
   pass

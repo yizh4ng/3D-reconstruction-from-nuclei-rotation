@@ -17,7 +17,7 @@ if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
   data = 'adam'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
-  save = False
+  save = True
   steps = 1
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 114) & (
   #     df['particle'] != 14) ] # 65 ~ 109
@@ -49,16 +49,16 @@ if __name__ == '__main__':
     dict['y'] = y
     dict['z'] = z
     dict['center'] = center
-    with open(f'./results/{data}/cell.pkl', 'wb+') as f:
-      pickle.dump(dict, f)
-    with open(f'./cell.pkl', 'wb+') as f:
+    # with open(f'./results/{data}/blender.pkl', 'wb+') as f:
+    #   pickle.dump(dict, f)
+    with open(f'./cell_class/{data}.pkl', 'wb+') as f:
       pickle.dump(cell, f)
-  # cv = Cell_Visualizer(cell)
+  cv = Cell_Visualizer(cell)
   # cv.train()
-  # cv.add_plotter(cv.draw_frame_2d)
-  # cv.add_plotter(cv.draw_frame_3d)
-  # cv.add_plotter(cv.draw_rotation)
-  # cv.show()
+  cv.add_plotter(cv.draw_frame_2d)
+  cv.add_plotter(cv.draw_frame_3d)
+  cv.add_plotter(cv.draw_rotation)
+  cv.show()
   # console.show_status('Start training...')
   # for i in range(steps):
   #   console.print_progress(i, total=steps)
