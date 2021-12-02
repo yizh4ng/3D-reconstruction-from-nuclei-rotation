@@ -81,5 +81,12 @@ class Guesser():
     r, t = rigid_transform_3D(x[index].T, y[index].T, center_x, center_y)
     return r
 
+  @classmethod
+  def fit_ellipse(cls, P:np.array):
+    from ellipse_fit import EllipsoidTool
+    ET = EllipsoidTool()
+    (center, radii, rotation) = ET.getMinVolEllipse(P, .01)
+    return center, radii, rotation
+
 if __name__ == '__main__':
   pass

@@ -17,7 +17,7 @@ if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
   data = 'adam'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
-  save = True
+  save = False
   steps = 1
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 114) & (
   #     df['particle'] != 14) ] # 65 ~ 109
@@ -38,25 +38,29 @@ if __name__ == '__main__':
   if save:
     dict = {}
     dict['radius'] = cell.radius
-    dict['center'] = cell.center
-    x, y, z, center = [], [], [], []
+    dict['radii'] = cell.radii
+    dict['ellipse_direction'] = cell.ellipse_direciton
+    x, y, z, center, r = [], [], [], [], []
     for f in cell.frames:
       x.append(f.x.tolist())
       y.append(f.y.tolist())
       z.append(f.z.tolist())
       center.append(f.center)
+      r.append(f.r)
     dict['x'] = x
     dict['y'] = y
     dict['z'] = z
+    dict['r'] = r
     dict['center'] = center
-    # with open(f'./results/{data}/blender.pkl', 'wb+') as f:
-    #   pickle.dump(dict, f)
+    with open(f'./results/{data}/cell.pkl', 'wb+') as f:
+      pickle.dump(dict, f)
     with open(f'./cell_class/{data}.pkl', 'wb+') as f:
       pickle.dump(cell, f)
   cv = Cell_Visualizer(cell)
   # cv.train()
   cv.add_plotter(cv.draw_frame_2d)
   cv.add_plotter(cv.draw_frame_3d)
+  cv.add_plotter(cv.draw_frame_3d_ellipse)
   cv.add_plotter(cv.draw_rotation)
   cv.show()
   # console.show_status('Start training...')

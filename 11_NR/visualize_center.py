@@ -75,6 +75,34 @@ class Cell_Visualizer(DaVinci):
     ax3d.plot_surface(x_, y_, z_, cmap=plt.cm.YlGnBu_r, alpha=0.1, linewidth=0,
                       rstride=1, cstride=1,)
 
+  def draw_frame_3d_ellipse(self,x,ax3d):
+    assert isinstance(x, Frame)
+    assert len(x.missing) == len(x.x)
+    for i in range(len(x.x)):
+      if x.missing[i] == 1:
+        ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='orange')
+      else:
+        ax3d.scatter(x.x[i], x.y[i], x.z[i], s=5, c='blue')
+    # ax3d.scatter(x.x, x.y, x.z, s=20, c = 'c')
+    ax3d.scatter([x.center[0]], [x.center[1]], [0], s=10, c='red')
+    width = max(self.x_max - self.x_low, self.y_max - self.y_low)
+    ax3d.set_xlim(self.x_low - 0.1 * width, self.x_low + 1.1 * width)
+    ax3d.set_ylim(self.y_low - 0.1 * width, self.y_low + 1.1 * width)
+    ax3d.set_zlim(self.z_low - 0.6 * width, self.z_low + 0.6 * width)
+    plt.axis('off')
+    u, v = np.mgrid[0:2 * np.pi:20j, 0:np.pi:50j]
+    x_ = x.radii[0] * np.cos(u) * np.sin(v)
+    y_ = x.radii[1] * np.sin(u) * np.sin(v)
+    z_ = x.radii[2] * np.cos(v)
+    after_rotation = np.transpose(np.array([x_, y_, z_]), [1,2,0]) \
+                      @ x.ellipse_rotation @ x.r.T
+    after_rotation = np.transpose(after_rotation, [2, 0, 1])
+    x_, y_, z_ = after_rotation[0], after_rotation[1], after_rotation[2]
+    x_ = x_ + x.center[0]
+    y_ = y_ + x.center[1]
+    ax3d.plot_surface(x_, y_, z_, cmap=plt.cm.YlGnBu_r, alpha=0.1, linewidth=0,
+                      rstride=1, cstride=1, )
+
   def draw_rotation(self, x, ax3d):
     assert isinstance(x, Frame)
     x_T = np.transpose(x.r)
@@ -117,13 +145,19 @@ class Cell_Visualizer(DaVinci):
 
 if __name__ == '__main__':
   data = 'adam'
-  save = True
-  with open(f'./cell_class/adam_op.pkl', 'rb') as f:
+  smooth = False
+  save = False
+  with open(f'./cell_class/adam.pkl', 'rb') as f:
     cell = pickle.load(f)
+  if smooth:
+    for _ in range(10):
+      cell.smooth()
+
   cv = Cell_Visualizer(cell)
   # cv.train()
   cv.add_plotter(cv.draw_frame_2d)
   cv.add_plotter(cv.draw_frame_3d)
+  cv.add_plotter(cv.draw_frame_3d_ellipse)
   cv.add_plotter(cv.draw_rotation)
   cv.show()
   if save:
@@ -140,7 +174,7 @@ if __name__ == '__main__':
     dict['y'] = y
     dict['z'] = z
     dict['center'] = center
-    with open(f'./results/{data}/cell_op.pkl', 'wb+') as f:
+    with open(f'./results/{data}/cell_op_smooth_more.pkl', 'wb+') as f:
       pickle.dump(dict, f)
     # with open(f'./cell.pkl', 'wb+') as f:
     #   pickle.dump(cell, f)

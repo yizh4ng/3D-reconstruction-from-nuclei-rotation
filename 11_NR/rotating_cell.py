@@ -22,10 +22,11 @@ class Rotating_Cell():
     self.missing = np.zeros(self.x.shape)
 
   def data_cleasing(self, x: np.array):
-    # for every frame, at least k particle
-    x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 3), axis=0)
-    # for very particle, at least k frames
-    x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 15), axis=0).T
+    for i in range(15):
+      # for very particle, at least k frames
+      x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 15), axis=0).T
+      # for every frame, at least k particle
+      x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 3), axis=0)
     self.missing = np.zeros(x.shape)
     assert len(x[0]) > 2
     return x
@@ -179,6 +180,39 @@ class Rotating_Cell():
       for j in range(len(self.missing[0])):
         self.frames[i].missing[j] = self.missing[i][j]
 
+  def smooth(self):
+    FRAMES = Frames(self.frames)
+    # f x p x 3
+    points = FRAMES.points
+    # f x p
+    x = points[:,:,0]
+    y = points[:,:,1]
+    z = points[:,:,2]
+    x_ = Guesser.smooth_center(x)
+    y_ = Guesser.smooth_center(y)
+    z_ = Guesser.smooth_center(z)
+    new_points = np.concatenate((np.expand_dims(x_, axis=-1),
+                                np.expand_dims(y_, axis=-1),
+                                np.expand_dims(z_, axis=-1)), axis=-1)
+
+    FRAMES.set_points(new_points)
+    self.frames = FRAMES.frames
+
+  def guess_ellipse(self):
+    points = np.concatenate((self.frames[0].points - np.array([self.center[0][0],
+                                                               self.center[0][1],
+                                                               0]),
+                             -(self.frames[0].points - np.array([self.center[0][0],
+                                                               self.center[0][1],
+                                                               0]))),
+                            axis=0)
+    center, radii, rotation = Guesser.fit_ellipse(points)
+    self.radii = radii
+    self.ellipse_direciton = rotation
+    for f in self.frames:
+      f.ellipse_rotation = rotation
+      f.radii = radii
+
   def run(self):
     self.x = self.data_cleasing(self.x)
     self.y = self.data_cleasing(self.y)
@@ -199,6 +233,7 @@ class Rotating_Cell():
     self.guess_missing()
     self.guess_missing_back()
     self.attaching_missing()
+    self.guess_ellipse()
 
 if __name__ == '__main__':
   np.expand_dims

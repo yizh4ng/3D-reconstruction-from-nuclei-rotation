@@ -23,7 +23,8 @@ class Frames():
       frame.delete_nan()
 
 class Frame():
-  def __init__(self, x, y, z, center, radius):
+  def __init__(self, x, y, z, center, radius, rotation=None, ellipse_rotation=None,
+               radii = None):
     self.x = x # (p, )
     self.y = y
     self.z = z
@@ -31,6 +32,9 @@ class Frame():
     self.radius = radius # float
 
     self.missing = np.zeros(len(self.x))
+    self.rotation = rotation
+    self.ellipse_rotation = ellipse_rotation
+    self.radii = radii
 
   # p * 3
   @property
