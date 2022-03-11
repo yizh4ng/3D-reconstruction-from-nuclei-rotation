@@ -11,21 +11,22 @@ from rotating_cell import Rotating_Cell
 from visualize_center import Cell_Visualizer
 from optimize import Trainer
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
-  data = 'adam'
+  data = 'data_13'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
-  save = False
+  save = True
   steps = 1
+  # df = df[(df['frame'] >= 15) & (df['frame'] <= 40)]
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 114) & (
   #     df['particle'] != 14) ] # 65 ~ 109
   #         & (df['particle'] != 47)]
   # df = df.sort_values(['frame', 'particle'], ascending=[True, True])
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 400)]
-  cell = Rotating_Cell(df, del_para=1.7, iteratively_op_radius=True,
-                       iterative_times=9)
+  cell = Rotating_Cell(df, del_para=10, radius_para=1.7, iteratively_op_radius=True,
+                       iterative_times=1, iterate=2)
   cell.run()
 
 
@@ -34,6 +35,8 @@ if __name__ == '__main__':
   xy = np.concatenate((x, y), axis = 1)
   center_ = np.expand_dims(cell.center, axis = -1)
   xy_with_center = np.concatenate((center_, xy), axis = -1)
+
+
 
   if save:
     dict = {}

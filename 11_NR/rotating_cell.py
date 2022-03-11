@@ -10,8 +10,9 @@ from frame import Frame, Frames
 
 
 class Rotating_Cell():
-  def __init__(self, df: pd.DataFrame, del_para = 1.7,
-               iteratively_op_radius= True, iterative_times = 2):
+  def __init__(self, df: pd.DataFrame, del_para = 1.7, radius_para = 2,
+               iteratively_op_radius= True, iterative_times = 2, iterate=2):
+    df = df[df['frame'] == df['frame']]
     self.data_frame = df
     self.frame_list = (list(set(list(map(int, df['frame'].values)))))
     self.particle_list = (list(set(list(map(int, df['particle'].values)))))
@@ -20,13 +21,15 @@ class Rotating_Cell():
     self.iterative = iteratively_op_radius
     self.iterative_times = iterative_times
     self.missing = np.zeros(self.x.shape)
+    self.radius_para = radius_para
+    self.iterate = iterate
 
   def data_cleasing(self, x: np.array):
-    for i in range(15):
+    for i in range(3):
       # for very particle, at least k frames
-      x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 15), axis=0).T
+      x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 4), axis=0).T
       # for every frame, at least k particle
-      x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 3), axis=0)
+      x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 4), axis=0)
     self.missing = np.zeros(x.shape)
     assert len(x[0]) > 2
     return x
@@ -83,8 +86,8 @@ class Rotating_Cell():
           assert (len(self.x) != 0)
           iter += 1
 
-    center = Guesser.guess_center(self.x, self.y)
-    self.center = Guesser.smooth_center(center)
+    self.center = Guesser.guess_center(self.x, self.y)
+    self.center = Guesser.smooth_center(self.center)
     R, R_mean = Guesser.guess_radius(self.x, self.y, center)
     self.radius = R
     self.mean_radius = R_mean
@@ -135,7 +138,7 @@ class Rotating_Cell():
 
         for k in range(j + 1, len(p1)):
           if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
-            if np.linalg.norm(p1[j] - p2[k]) < 2:
+            if np.linalg.norm(p1[j] - p2[k]) < 5:
 
               for l in range(i + 1, len(self.frames)):
                 self.frames[l].set_point(self.frames[l].points[k], j)
@@ -214,26 +217,33 @@ class Rotating_Cell():
       f.radii = radii
 
   def run(self):
-    self.x = self.data_cleasing(self.x)
-    self.y = self.data_cleasing(self.y)
-    self.x = Guesser.smooth_center(self.x)
-    self.y = Guesser.smooth_center(self.y)
-    self.x = self.data_cleasing(self.x)
-    self.y = self.data_cleasing(self.y)
-    self.frames = []
-    self.guess_radius()
-    self.radius = self.del_para * self.mean_radius
-    self.guess_depth()
-    for i in range(len(self.x)):
-      self.frames.append(
-        Frame(self.x[i], self.y[i], self.z[i], self.center[i], self.radius))
-    assert len(self.frames) > 0
-    self.guess_rotation()
-    self.attach_rotation()
-    self.guess_missing()
-    self.guess_missing_back()
-    self.attaching_missing()
-    self.guess_ellipse()
+    for i in range(self.iterate):
+      # self.x = self.data_cleasing(self.x)
+      # self.y = self.data_cleasing(self.y)
+      # self.x = Guesser.smooth_center(self.x)
+      # self.y = Guesser.smooth_center(self.y)
+      self.x = self.data_cleasing(self.x)
+      self.y = self.data_cleasing(self.y)
+      self.frames = []
+      self.guess_radius()
+      if self.radius_para is None:
+        self.radius = self.del_para * self.mean_radius
+      else:
+        self.radius = self.radius_para * self.mean_radius
+      self.guess_depth()
+      for i in range(len(self.x)):
+        self.frames.append(
+          Frame(self.x[i], self.y[i], self.z[i], self.center[i], self.radius))
+      assert len(self.frames) > 0
+      self.guess_rotation()
+      self.attach_rotation()
+      self.guess_missing()
+      self.guess_missing_back()
+      self.attaching_missing()
+      self.guess_ellipse()
+      self.x = Frames(self.frames).points[:,:,0]
+      self.y = Frames(self.frames).points[:,:,1]
+      self.z = Frames(self.frames).points[:,:,2]
 
 if __name__ == '__main__':
   np.expand_dims

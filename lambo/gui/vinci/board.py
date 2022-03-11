@@ -57,7 +57,7 @@ class Board(Nomear):
     self._cmap = None
 
     # 3D options
-    self.keep_3D_view_angle = False
+    self.keep_3D_view_angle = True
     self.view_angle = None
     self.z_lim_tuple: Optional[Tuple[float, float]] = None
 

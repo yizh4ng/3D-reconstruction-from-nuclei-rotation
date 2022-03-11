@@ -6,6 +6,7 @@ class Guesser():
   def __init__(self, x, y):
     pass
 
+  # Guess set center as the mean of serveral points
   @classmethod
   def guess_center(cls, x:np.array, y:np.array):
     center = []
@@ -16,6 +17,7 @@ class Guesser():
       center.append([np.nanmean(x[i]), np.nanmean(y[i])])
     return center
 
+  # smooth an array by a convolution
   @classmethod
   def smooth_center(cls, center:np.ndarray):
     center = np.array(center)
@@ -25,6 +27,7 @@ class Guesser():
     center = np.transpose(center, [1, 0])
     return center
 
+  # guess the radius a the mean of radius
   @classmethod
   def guess_radius(cls, x: np.ndarray, y:np.ndarray, center:np.ndarray):
     # everyframe

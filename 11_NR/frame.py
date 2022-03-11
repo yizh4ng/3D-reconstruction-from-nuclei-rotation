@@ -1,5 +1,6 @@
 import numpy as np
 
+# This class represents a series of frames
 class Frames():
   def __init__(self, frames_: list):
     self.frames = frames_
@@ -22,6 +23,7 @@ class Frames():
     for frame in frames:
       frame.delete_nan()
 
+# This class represents a frame containing all information of a frame
 class Frame():
   def __init__(self, x, y, z, center, radius, rotation=None, ellipse_rotation=None,
                radii = None):
