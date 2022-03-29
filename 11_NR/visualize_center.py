@@ -13,6 +13,10 @@ from tframe import tf
 from rotating_cell import Rotating_Cell
 from optimize import training
 from construct_tensor import frames_to_tensors
+from scipy.spatial.transform import Rotation as R
+
+
+
 sys.path.insert(0, "./src")
 class Cell_Visualizer(DaVinci):
   def __init__(self, cell: Rotating_Cell):
@@ -105,6 +109,13 @@ class Cell_Visualizer(DaVinci):
 
   def draw_rotation(self, x, ax3d):
     assert isinstance(x, Frame)
+    r = R.from_matrix(x.locale_r)
+    # print(self.object_cursor, r.as_euler('zyx', degrees=True))
+    # print(self.object_cursor, r.as_rotvec())
+    local_r = r.as_rotvec()
+    local_r_norm = local_r * 5
+    ax3d.plot3D([local_r_norm[0],0], [local_r_norm[1], 0], [local_r_norm[2], 0])
+    # print(self.object_cursor, np.pi * np.linalg.norm(local_r) * np.sign(local_r @ np.array([0, 0, 1])))
     x_T = np.transpose(x.r)
     for i in range(3):
       ax3d.plot3D([x_T[i][0],0],
@@ -145,13 +156,13 @@ class Cell_Visualizer(DaVinci):
 
 if __name__ == '__main__':
   data = 'adam'
-  smooth = False
-  save = False
+  # smooth = False
+  # save = False
   with open(f'./cell_class/adam.pkl', 'rb') as f:
     cell = pickle.load(f)
-  if smooth:
-    for _ in range(10):
-      cell.smooth()
+  # if smooth:
+  #   for _ in range(10):
+  #     cell.smooth()
 
   cv = Cell_Visualizer(cell)
   # cv.train()
@@ -160,21 +171,21 @@ if __name__ == '__main__':
   cv.add_plotter(cv.draw_frame_3d_ellipse)
   cv.add_plotter(cv.draw_rotation)
   cv.show()
-  if save:
-    dict = {}
-    dict['radius'] = cell.radius
-    dict['center'] = cell.center
-    x, y, z, center = [], [], [], []
-    for f in cell.frames:
-      x.append(f.x.tolist())
-      y.append(f.y.tolist())
-      z.append(f.z.tolist())
-      center.append(f.center)
-    dict['x'] = x
-    dict['y'] = y
-    dict['z'] = z
-    dict['center'] = center
-    with open(f'./results/{data}/cell_op_smooth_more.pkl', 'wb+') as f:
-      pickle.dump(dict, f)
+  # if save:
+  #   dict = {}
+  #   dict['radius'] = cell.radius
+  #   dict['center'] = cell.center
+  #   x, y, z, center = [], [], [], []
+  #   for f in cell.frames:
+  #     x.append(f.x.tolist())
+  #     y.append(f.y.tolist())
+  #     z.append(f.z.tolist())
+  #     center.append(f.center)
+  #   dict['x'] = x
+  #   dict['y'] = y
+  #   dict['z'] = z
+  #   dict['center'] = center
+  #   with open(f'./results/{data}/cell_op_smooth_more.pkl', 'wb+') as f:
+  #     pickle.dump(dict, f)
     # with open(f'./cell.pkl', 'wb+') as f:
     #   pickle.dump(cell, f)

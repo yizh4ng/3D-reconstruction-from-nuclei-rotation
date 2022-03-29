@@ -1,6 +1,7 @@
 from lambo.analyzer.tracker import Tracker
 
 import trackpy as tp
+import pandas
 import numpy as np
 import matplotlib.pyplot as plt
 class TrackerAlpha(Tracker):
@@ -28,10 +29,12 @@ class TrackerAlpha(Tracker):
     df[(df['particle'] == self.chosen_points[1][1])] = np.nan
     print('Connected')
     self.chosen_points = []
+    self.create_id = 9999
 
   def create(self):
     if self.mode != 'create':
       self.mode = 'create'
+      self.create_id = self.trajectories['particle'].max() + 1
     else:
       self.mode = 'select'
     print(f'Current mode {self.mode}')
@@ -70,8 +73,8 @@ class TrackerAlpha(Tracker):
       df.loc[len(df)-1]['y'] = iy
       df.loc[len(df)-1]['x'] = ix
       df.loc[len(df)-1]['frame'] = self.object_cursor
-      df.loc[len(df)-1]['particle'] = df['particle'].max() + 1
-      print(f"create pt {df['particle'].max()} at {ix, iy} at frame:{self.object_cursor}")
+      df.loc[len(df)-1]['particle'] = self.create_id
+      print(f"create pt {self.create_id} at {ix, iy} at frame:{self.object_cursor}")
 
   def show_locations(self, show_traj=True, **locate_configs):
     # TODO: for some reason, locate config can be modified here
@@ -122,20 +125,35 @@ if __name__ == '__main__':
   index =  2
   diameter = 11
   minmass = 1
-  search_range= 30
+  search_range= 5
   memory = 10
+  invert=False
+
+  # diameter = 7
+  # minmass = 1
+  # search_range= 15
+  # memory = 5
+  # invert = True
+
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
-  file_name = 'data_13'
+  file_name = 'adam'
+  # file_name = 'sim_ro'
+  load = True
   save = True
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 10
-  tk.config_locate(diameter=diameter,minmass=minmass)
+  if load:
+    tk.trajectories = tk.locations = pandas
+    # with open(f"./pkl/{file_name}.pkl") as file:
+    tk.trajectories = tk.locations = pandas.read_pickle(f"./pkl/{file_name}.pkl")
+  tk.config_locate(diameter=diameter,minmass=minmass, invert=invert)
   tk.config_link(search_range=search_range, memory=memory)
   tk.add_plotter(tk.imshow)
   tk.add_plotter(tk.show_locations)
 
   tk.show_locations()
+
   # print(df)
   df = tk.trajectories
   print(df)

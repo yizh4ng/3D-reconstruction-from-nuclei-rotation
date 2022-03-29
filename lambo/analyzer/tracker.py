@@ -29,6 +29,9 @@ class Tracker(DaVinci):
     super(Tracker, self).__init__('Nuclei Browser', height=size, width=size)
 
     # Specific attributes
+    print(np.array(frames).shape)
+    if len(np.array(frames).shape) > 3:
+      frames = np.sum(np.array(frames), axis=-1)
     self.raw_frames = frames
     self.images: np.ndarray = frames / np.max(frames)
     self.objects = self.images

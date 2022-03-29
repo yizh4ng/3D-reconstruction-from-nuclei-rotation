@@ -81,8 +81,9 @@ class Rotating_Cell():
           center = Guesser.guess_center(self.x, self.y)
           R, R_mean = Guesser.guess_radius(self.x, self.y, center)
           self.x, self.y, flag = Guesser.delete_outlier(self.x, self.y, R, R_mean)
-          self.x = self.data_cleasing(self.x)
-          self.y = self.data_cleasing(self.y)
+          # self.x = self.data_cleasing(self.x)
+          # self.y = self.data_cleasing(self.y)
+          self.missing = np.zeros_like(self.x)
           assert (len(self.x) != 0)
           iter += 1
 
@@ -123,29 +124,54 @@ class Rotating_Cell():
       p2 = self.frames[i + 1].points
       # for every point
       for j in range(len(p1)):
-        if ~np.isnan(p1[j]).any() and ~np.isnan(p2[j]).any():
-          if np.linalg.norm(p1[j] - p2[j]) > 5:
-            self.frames[i + 1].set_point(np.array([np.nan, np.nan, np.nan]), j)
-            p2 = self.frames[i + 1].points
-            self.missing[i + 1][j] = 1
+        # handle wrong connection
+        if ~np.isnan(p1[j]).any():
+          if self.missing[i][j] != 1:
+            self.missing[i][j] = 0
 
+        if np.isnan(p1[j]).any():
+          # if self.missing[i][j] != 1:
+          self.missing[i][j] = 1
+
+        # if ~np.isnan(p1[j]).any() and ~np.isnan(p2[j]).any():
+        #   if np.linalg.norm(p1[j] - p2[j]) > 15:
+        #     self.frames[i + 1].set_point(np.array([np.nan, np.nan, np.nan]), j)
+        #     # p2 = self.frames[i + 1].points
+        #     self.missing[i + 1][j] = 1
+
+        # predict position
         if ~np.isnan(p1[j]).any() and np.isnan(p2[j]).any():
           p2[j] = self.frames[i].locale_r @ (p1[j] - self.frames[i].center_position) + \
                   self.frames[i + 1].center_position
           self.frames[i + 1].set_point(p2[j], j)
           self.missing[i + 1][j] = 1
 
-
-        for k in range(j + 1, len(p1)):
-          if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
-            if np.linalg.norm(p1[j] - p2[k]) < 5:
-
-              for l in range(i + 1, len(self.frames)):
-                self.frames[l].set_point(self.frames[l].points[k], j)
-                self.missing[l][j] = self.missing[l][k]
-              for l in range(0, len(self.frames)):
-                self.frames[l].set_point(np.array([np.nan, np.nan, np.nan]), k)
-              points_to_delete.append(k)
+        # connect division
+    # for i in range(len(self.frames) - 1):
+    #   p1 = self.frames[i].points
+    #   p2 = self.frames[i + 1].points
+    #   for j in range(len(p1)):
+    #     for k in range(0, len(p1)):
+    #       if ~np.isnan(p1[j]).any() and ~np.isnan(p2[k]).any() and j != k:
+    #         if np.linalg.norm(p1[j][:2] - p2[k][:2]) < 3:
+    #           if len(np.argwhere(np.isnan(Frames(self.frames).points[:i, j]))) == 0:
+    #             to_append = j
+    #             to_delete = k
+    #           elif len(np.argwhere(np.isnan(Frames(self.frames).points[:i, k]))) == 0:
+    #             to_append = k
+    #             to_delete = j
+    #           elif np.sum(self.missing[:i + 1, k] == 0) > np.sum(self.missing[:i + 1, j] == 0):
+    #             to_append = j
+    #             to_delete = k
+    #           else:
+    #             to_append = k
+    #             to_delete = j
+    #           for l in range(i + 1, len(self.frames)):
+    #             self.frames[l].set_point(self.frames[l].points[to_delete], to_append)
+    #             self.missing[l][to_append] = self.missing[l][to_delete]
+    #           for l in range(0, len(self.frames)):
+    #             self.frames[l].set_point(np.array([np.nan, np.nan, np.nan]), to_delete)
+    #           points_to_delete.append(to_delete)
 
     points_to_delete = list(set(points_to_delete))
     # print(points_to_delete)
@@ -175,7 +201,7 @@ class Rotating_Cell():
       self.frames[i - 1].set_points(p2)
 
     # points = Frames(self.frames).points[:,:,0]
-    assert np.isnan(Frames(self.frames).points).any() == False
+    # assert np.isnan(Frames(self.frames).points).any() == False
 
   def attaching_missing(self):
     assert self.missing.shape ==  (len(self.frames), len(self.frames[0].points))
@@ -218,12 +244,12 @@ class Rotating_Cell():
 
   def run(self):
     for i in range(self.iterate):
-      # self.x = self.data_cleasing(self.x)
-      # self.y = self.data_cleasing(self.y)
-      # self.x = Guesser.smooth_center(self.x)
-      # self.y = Guesser.smooth_center(self.y)
       self.x = self.data_cleasing(self.x)
       self.y = self.data_cleasing(self.y)
+      # self.x = Guesser.smooth_center(self.x)
+      # self.y = Guesser.smooth_center(self.y)
+      # self.x = self.data_cleasing(self.x)
+      # self.y = self.data_cleasing(self.y)
       self.frames = []
       self.guess_radius()
       if self.radius_para is None:
