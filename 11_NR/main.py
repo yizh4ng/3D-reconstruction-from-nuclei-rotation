@@ -15,7 +15,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
-  data = 'adam'
+  data = 'data_17'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
   # df = pd.read_pickle(f'./pkl/opt/adam/adam_176.pkl')
   save = True
@@ -26,7 +26,7 @@ if __name__ == '__main__':
   #         & (df['particle'] != 47)]
   # df = df.sort_values(['frame', 'particle'], ascending=[True, True])
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 400)]
-  cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=True,
+  cell = Rotating_Cell(df, del_para=1.5, radius_para=1.5, iteratively_op_radius=True,
                        iterative_times=1, iterate=1)
   cell.run()
 
@@ -57,6 +57,8 @@ if __name__ == '__main__':
     dict['r'] = r
     dict['missing'] = missing
     dict['center'] = center
+    if not os.path.exists(f'./results/{data}'):
+      os.makedirs(f'./results/{data}')
     with open(f'./results/{data}/cell.pkl', 'wb+') as f:
       pickle.dump(dict, f)
     with open(f'./cell_class/{data}.pkl', 'wb+') as f:

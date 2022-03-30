@@ -244,8 +244,8 @@ class Rotating_Cell():
 
   def run(self):
     for i in range(self.iterate):
-      self.x = self.data_cleasing(self.x)
-      self.y = self.data_cleasing(self.y)
+      # self.x = self.data_cleasing(self.x)
+      # self.y = self.data_cleasing(self.y)
       # self.x = Guesser.smooth_center(self.x)
       # self.y = Guesser.smooth_center(self.y)
       # self.x = self.data_cleasing(self.x)

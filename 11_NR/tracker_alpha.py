@@ -128,18 +128,18 @@ if __name__ == '__main__':
   search_range= 5
   memory = 10
   invert=False
-
+  #
   # diameter = 7
-  # minmass = 1
+  # minmass = 3.5
   # search_range= 15
   # memory = 5
   # invert = True
 
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
-  file_name = 'adam'
-  # file_name = 'sim_ro'
-  load = True
+  # file_name = 'adam'
+  file_name = 'data_17'
+  load = False
   save = True
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 10

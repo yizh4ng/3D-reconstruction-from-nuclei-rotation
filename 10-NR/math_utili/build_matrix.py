@@ -7,7 +7,9 @@ import json
 import numpy as np
 def build_matrix(x:list, y:list):
   x = np.array(x)
+  x = x - np.expand_dims(np.mean(x, -1), -1)
   y = np.array(y)
+  y = y - np.expand_dims(np.mean(y, -1), -1)
   return np.concatenate((x,y), axis=0)
 
 def get_notNAN_row_and_col(data, x, y):
@@ -26,9 +28,9 @@ def get_notNAN_row_and_col(data, x, y):
 
 def data_cleasing(x:np.array):
   # for every frame, at least 3 particle
-  x = np.delete(x, np.where(np.sum(~np.isnan(x), axis=1) < 3), axis=0)
+  # x = np.delete(x, np.where(np.sum(np.isnan(x), axis=1) > 0), axis=0)
   # for very particle, at least 3 frames
-  x = np.delete(x.T, np.where(np.sum(~np.isnan(x.T), axis=1) < 5), axis=0).T
+  x = np.delete(x.T, np.where(np.sum(np.isnan(x.T), axis=1) > 0), axis=0).T
   return x
 
 def find_NAN_location(x:np.array):

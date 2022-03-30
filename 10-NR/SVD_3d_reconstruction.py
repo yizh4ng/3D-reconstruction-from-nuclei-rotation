@@ -92,10 +92,12 @@ if __name__ == '__main__':
   # Sn = np.array([x[0], y[0] ,z[0]])
   # print(np.linalg.norm(Sn - vis.objects[0]))
 
-  df = pickle.load(open("./data_real_all.pkl", 'rb'))
+  # df = pickle.load(open("./data_real_all.pkl", 'rb'))
+  df = pickle.load(open("../11_NR/pkl/step5.pkl", 'rb'))
+  df = df[df['frame'] == df['frame']]
   print(df['frame'].max())
-  df:DataFrame= df[(df['frame'] >= 85) & (df['frame'] <= 105) & (df['particle'] != 14)# 65 ~ 109
-                   & (df['particle'] != 47)]
+  # df:DataFrame= df[(df['frame'] >= 85) & (df['frame'] <= 105) & (df['particle'] != 14)# 65 ~ 109
+  #                  & (df['particle'] != 47)]
   df = df.sort_values(['frame', 'particle'], ascending=[True, True])
   # df1 = pickle.load(open("./data.pkl", 'rb'))
   x, y = math_utili.build_matrix.build_matrix_from_df(df)
@@ -108,15 +110,15 @@ if __name__ == '__main__':
   #x = x[:10,:8]
   # y = y[:10,:8]
   x1 = copy.deepcopy(x)
-  nan_location = math_utili.build_matrix.find_NAN_location(x)
+  # nan_location = math_utili.build_matrix.find_NAN_location(x)
   # sub_matrix = math_utili.build_matrix.find_submatrix(x, nan_location)
 
   # reconstruct_missing(x,y,np.array([0, 10]), np.array([[21,22,23, 24, 25], [ 7, 6, 2,  1, 0]]))
-  # print(x[0,10])
-  for NAN_loc in nan_location:
-    sub_matrix = math_utili.build_matrix.find_sub_matrix_by_one(x, NAN_loc, nan_location)
-    if isinstance(sub_matrix, np.ndarray):
-      reconstruct_missing(x, y, NAN_loc, sub_matrix)
+  # # print(x[0,10])
+  # for NAN_loc in nan_location:
+  #   sub_matrix = math_utili.build_matrix.find_sub_matrix_by_one(x, NAN_loc, nan_location)
+  #   if isinstance(sub_matrix, np.ndarray):
+  #     reconstruct_missing(x, y, NAN_loc, sub_matrix)
       # nan_location = nan_location[1:]
       # print(len(nan_location))
 
@@ -134,6 +136,7 @@ if __name__ == '__main__':
   # with open('data/y.json', 'w') as f:
   #   json.dump(y.tolist(), f)
   M = math_utili.build_matrix.build_matrix(x, y)
+  # M  = np.delete()
   r, s = SVD_reconstruct(M)
   r = r[0]
   s = s[0]
