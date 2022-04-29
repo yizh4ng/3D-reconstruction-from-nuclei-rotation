@@ -72,7 +72,8 @@ class Rotating_Cell():
     center = Guesser.guess_center(self.x, self.y)
     # F x 2 x (1 + P)
     R, R_mean = Guesser.guess_radius(self.x, self.y, center)
-    self.x, self.y, flag = Guesser.delete_outlier(self.x, self.y, R, R_mean)
+    # self.x, self.y, flag = Guesser.delete_outlier(self.x, self.y, R, R_mean)
+    flag = True
     iter = 1
     if self.iterative:
         while flag and iter <= self.iterative_times:
@@ -86,7 +87,6 @@ class Rotating_Cell():
           self.missing = np.zeros_like(self.x)
           assert (len(self.x) != 0)
           iter += 1
-
     self.center = Guesser.guess_center(self.x, self.y)
     self.center = Guesser.smooth_center(self.center)
     R, R_mean = Guesser.guess_radius(self.x, self.y, center)

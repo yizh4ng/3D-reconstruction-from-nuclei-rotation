@@ -35,6 +35,8 @@ class TrackerAlpha(Tracker):
     if self.mode != 'create':
       self.mode = 'create'
       self.create_id = self.trajectories['particle'].max() + 1
+      if np.isnan(self.create_id):
+        self.create_id = 0
     else:
       self.mode = 'select'
     print(f'Current mode {self.mode}')
@@ -89,15 +91,18 @@ class TrackerAlpha(Tracker):
     df = self.locations
     # Link location if necessary
     if show_traj:
-      if self.trajectories is None: self.link()
+      if self.trajectories is None:
+        self.link()
+        self.trajectories = self.trajectories[0:0]
       configs = self.effective_link_config
       df = self.trajectories
+
     # Display different particle with different colors
     df = df[df['frame'] == self.object_cursor]
     # tp.annotate(df, self.raw_frames[self.object_cursor],
-    #             color=np.vstack((np.linspace((0,0.5,0),(0,1,0),num=100),
-    #                             np.linspace((0.5,0,0),(1,0,0),num=100),
-    #                             np.linspace((0,0,0.5),(0,0,1),num=100),)),
+    #             color=np.vstack((np.linspace((0,0.99,0),(0,1,0),num=300))),
+    #                             # np.linspace((0.5,0,0),(1,0,0),num=100),
+    #                             # np.linspace((0,0,0.5),(0,0,1),num=100),)),
     #             split_category="particle",
     #             split_thresh=np.arange(299),ax=self.axes)
     self.imshow(self.raw_frames[self.object_cursor], self.axes)
@@ -125,8 +130,8 @@ if __name__ == '__main__':
   index =  2
   diameter = 11
   minmass = 1
-  search_range= 5
-  memory = 10
+  search_range= 10
+  memory = 1
   invert=False
   #
   # diameter = 7
@@ -138,15 +143,18 @@ if __name__ == '__main__':
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
   # file_name = 'adam'
-  file_name = 'data_17'
-  load = False
-  save = True
+  file_name = 'adam'
+  load = True
+  save = False
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 10
   if load:
     tk.trajectories = tk.locations = pandas
     # with open(f"./pkl/{file_name}.pkl") as file:
-    tk.trajectories = tk.locations = pandas.read_pickle(f"./pkl/{file_name}.pkl")
+    df = pandas.read_pickle(f"./pkl/{file_name}.pkl")
+    # df[(df['particle'] > 250) & (df['particle'] < 450)] = df[0:0]
+    # df[df['frame'] == 144] = df[df['frame'] == 144][0:0]
+    tk.trajectories = tk.locations = df
   tk.config_locate(diameter=diameter,minmass=minmass, invert=invert)
   tk.config_link(search_range=search_range, memory=memory)
   tk.add_plotter(tk.imshow)

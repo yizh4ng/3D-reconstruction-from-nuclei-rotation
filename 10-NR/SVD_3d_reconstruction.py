@@ -6,6 +6,7 @@ import math_utili.SVD
 import numpy as np
 import numpy.linalg as LA
 from scipy.optimize import fsolve,leastsq
+import pandas as pd
 from pandas import DataFrame
 from visualize_xyz import visualize_xyz
 def SV_D(M:np.array):
@@ -140,6 +141,7 @@ if __name__ == '__main__':
   r, s = SVD_reconstruct(M)
   r = r[0]
   s = s[0]
+  # s = s[:, s[-1, :] > 0 * np.max(s[-1, :])]
   R = []
   for i in range(int(len(r)/2)):
     perpen = np.cross(r[i], r[i + int(len(r)/ 2)])
@@ -147,10 +149,25 @@ if __name__ == '__main__':
     R.append(R_)
   vis = visualize_xyz()
   for r in R:
-    vis.objects.append(r @ s)
+    r_s = r @ s
+    # r_s = r_s[:, r_s[-1, :] > 0 * np.max(r_s[-1, :])]
+    vis.objects.append(r_s)
   # vis.objects = R @ s
+  vis.add_plotter(vis.draw_2d)
   vis.add_plotter(vis.draw_3d)
   vis.show()
 
+  save = True
+  alpha = 0.5
+  if save:
+    df = pd.DataFrame(data={'frame':[], 'particle':[], 'x':[], 'y': []})
+    max_height = np.max(np.array(vis.objects)[:,-1,:])
+    for frame_id, ob in enumerate(vis.objects):
+      for pt_id,pt in enumerate(ob.T):
+        if pt[-1] > alpha * max_height:
+          df = df.append({'frame': frame_id, 'particle': pt_id, 'x': pt[0], 'y': pt[1], 'z': pt[2]},
+                    ignore_index=True)
 
-  print("finish")
+    df.to_pickle(f'../11_NR/pkl/{alpha}_height.pkl')
+
+
