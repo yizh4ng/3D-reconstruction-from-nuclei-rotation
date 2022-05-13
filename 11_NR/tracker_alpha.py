@@ -71,6 +71,9 @@ class TrackerAlpha(Tracker):
       self.chosen_points.append([self.object_cursor, nearest_point_id])
     elif self.mode == 'create':
       df = self.trajectories
+      if len(df[(df['frame'] == self.object_cursor) & (df['particle'] == self.create_id)]) > 0:
+        print(f'pt {self.create_id} has already been created at frame:{self.object_cursor}')
+        return
       df.loc[len(df)] = np.nan
       df.loc[len(df)-1]['y'] = iy
       df.loc[len(df)-1]['x'] = ix
@@ -143,9 +146,10 @@ if __name__ == '__main__':
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
   # file_name = 'adam'
-  file_name = 'adam'
-  load = True
-  save = False
+  # file_name = 'adam'
+  file_name = 'three_before_division'
+  load = False
+  save = True
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 10
   if load:

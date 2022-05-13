@@ -166,6 +166,8 @@ class Cell_Visualizer(DaVinci):
 
 if __name__ == '__main__':
   data = 'adam'
+  # data = 'fast_multi_2'
+  data = 'three_before_division'
   with open(f'./cell_class/{data}.pkl', 'rb') as f:
     cell = pickle.load(f)
 
@@ -177,9 +179,9 @@ if __name__ == '__main__':
     # if i % 10 != 0: continue
     rotvec = R.from_matrix(frame.locale_r).as_rotvec(degrees=True)
     if np.array([0, 0, 1]) @ rotvec > 0:
-      local_r = np.linalg.norm(R.from_matrix(frame.locale_r).as_rotvec(degrees=True))
+      local_r += np.linalg.norm(R.from_matrix(frame.locale_r).as_rotvec(degrees=True))
     else:
-      local_r = -np.linalg.norm(
+      local_r += -np.linalg.norm(
         R.from_matrix(frame.locale_r).as_rotvec(degrees=True))
     rotation.append(local_r)
   x_axis = np.arange(len(rotation))
@@ -233,12 +235,13 @@ if __name__ == '__main__':
         # ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
         #         color=(j/N, j/N, j/N), alpha=0.7)
         ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-                color=plt.cm.jet(j / N), alpha=0.0)
+                color=plt.cm.jet(j / N), alpha=1.0)
       else:
         ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-                color=plt.cm.jet(j / N), alpha=0)
+                color=plt.cm.jet(j / N), alpha=1)
     # ax.plot3D(*np.transpose(rotation[i]), c=color_dict[i])
-  ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+  plt.show()
+  '''ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
   ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
   ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
   # ax.set_xlabel('x')
@@ -314,4 +317,4 @@ if __name__ == '__main__':
         ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
                 color=plt.cm.jet(j / N))
     # ax.plot3D(*np.transpose(rotation[i]), c=color_dict[i])
-  plt.show()
+  plt.show()'''

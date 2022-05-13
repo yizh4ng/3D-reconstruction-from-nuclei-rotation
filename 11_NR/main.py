@@ -15,10 +15,12 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
-  data = 'adam'
+  # data = 'adam'
+  # data = 'fast_multi_2'
+  data = 'three_before_division'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
   # df = pd.read_pickle(f'./pkl/opt/adam/adam_176.pkl')
-  save = False
+  save = True
   steps = 1
   # df = df[(df['frame'] >= 15) & (df['frame'] <= 40)]
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 114) & (
