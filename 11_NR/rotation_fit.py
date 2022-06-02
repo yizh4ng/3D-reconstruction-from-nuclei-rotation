@@ -30,8 +30,8 @@ def rigid_transform_3D(A, B, center_A, center_B):
     H = Am @ np.transpose(Bm)
 
     # sanity check
-    #if linalg.matrix_rank(H) < 3:
-    #    raise ValueError("rank of H = {}, expecting 3".format(linalg.matrix_rank(H)))
+    if np.linalg.matrix_rank(H) < 3:
+        return np.identity(3), 0
 
     # find rotation
     assert np.isnan(H).any() == False
@@ -41,8 +41,10 @@ def rigid_transform_3D(A, B, center_A, center_B):
     # special reflection case
     if np.linalg.det(R) < 0:
         print("det(R) < R, reflection detected!, correcting for it ...")
+        print('ha')
         Vt[2,:] *= -1
         R = Vt.T @ U.T
+        # R = np.identity(3)
 
     t = -R @ centroid_A + centroid_B
 

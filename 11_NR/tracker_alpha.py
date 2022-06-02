@@ -14,6 +14,7 @@ class TrackerAlpha(Tracker):
     self.state_machine.register_key_event('c', self.connect)
     self.state_machine.register_key_event('d', self.delete)
     self.state_machine.register_key_event('n', self.create)
+    self.state_machine.register_key_event('x', self.delete_all)
 
   def connect(self):
     if len(self.chosen_points) != 2:
@@ -47,6 +48,12 @@ class TrackerAlpha(Tracker):
       df = self.trajectories
       df[(df['frame'] == pt[0]) & (
           df['particle'] == pt[1])] = np.nan
+
+  def delete_all(self):
+    print(f'delete all points with index {self.chosen_points}')
+    for pt in self.chosen_points:
+      df = self.trajectories
+      df[df['particle'] == pt[1]] = np.nan
 
   def cancell_selected_points(self):
     print('Cancell selected points')
@@ -146,15 +153,17 @@ if __name__ == '__main__':
   # Read the tif stack
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
   # file_name = 'adam'
-  # file_name = 'adam'
-  file_name = 'three_before_division'
-  load = False
-  save = True
+  # file_name = 'unsyn_cos_2'
+  file_name = 'four_nucleus'
+  load = True
+  save = False
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)
   # tk.n_frames = 10
   if load:
     tk.trajectories = tk.locations = pandas
-    # with open(f"./pkl/{file_name}.pkl") as file:
+    # with open(f"./pkl/{file_name}.pkl", 'rb') as file:
+    #   import pickle
+    #   df = pickle.load(file)
     df = pandas.read_pickle(f"./pkl/{file_name}.pkl")
     # df[(df['particle'] > 250) & (df['particle'] < 450)] = df[0:0]
     # df[df['frame'] == 144] = df[df['frame'] == 144][0:0]

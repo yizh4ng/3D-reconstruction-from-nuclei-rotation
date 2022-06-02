@@ -17,7 +17,7 @@ if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
   # data = 'adam'
   # data = 'fast_multi_2'
-  data = 'three_before_division'
+  data = 'unsyn_cos_2'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
   # df = pd.read_pickle(f'./pkl/opt/adam/adam_176.pkl')
   save = True
@@ -28,7 +28,9 @@ if __name__ == '__main__':
   #         & (df['particle'] != 47)]
   # df = df.sort_values(['frame', 'particle'], ascending=[True, True])
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 400)]
-  cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=True,
+  # cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=True,
+  #                      iterative_times=1, iterate=1)
+  cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=False,
                        iterative_times=1, iterate=1)
   cell.run()
 

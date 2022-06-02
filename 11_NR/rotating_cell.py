@@ -248,8 +248,8 @@ class Rotating_Cell():
       # self.y = self.data_cleasing(self.y)
       # self.x = Guesser.smooth_center(self.x)
       # self.y = Guesser.smooth_center(self.y)
-      self.x = self.data_cleasing(self.x)
-      self.y = self.data_cleasing(self.y)
+      # self.x = self.data_cleasing(self.x)
+      # self.y = self.data_cleasing(self.y)
       self.frames = []
       self.guess_radius()
       if self.radius_para is None:
