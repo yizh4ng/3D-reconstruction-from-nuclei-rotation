@@ -154,7 +154,7 @@ if __name__ == '__main__':
   #tk = TrackerAlpha.read_by_index(data_dir, index, show_info=True)
   # file_name = 'adam'
   # file_name = 'unsyn_cos_2'
-  file_name = 'four_nucleus'
+  file_name = 'T5P5_1'
   load = True
   save = False
   tk = TrackerAlpha.read(f'./data/{file_name}.tif', show_info=True)

@@ -17,7 +17,7 @@ if __name__ == '__main__':
   # df = pd.read_pickle('./data_real_all.pkl')
   # data = 'adam'
   # data = 'fast_multi_2'
-  data = 'unsyn_cos_2'
+  data = 'T5P5_4'
   df = pd.read_pickle(f'./pkl/{data}.pkl')
   # df = pd.read_pickle(f'./pkl/opt/adam/adam_176.pkl')
   save = True

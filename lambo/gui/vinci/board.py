@@ -30,7 +30,7 @@ class Board(Nomear):
 
   def __init__(self, title=None, height=5, width=5):
     # Set matploblib backend
-    matplotlib.use('TkAgg')
+    matplotlib.use('tkagg')
 
     self.objects: list = []
     self.object_titles: list = []

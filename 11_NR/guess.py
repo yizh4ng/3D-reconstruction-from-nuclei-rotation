@@ -80,7 +80,7 @@ class Guesser():
   @classmethod
   # x, y: (p, 3) center: (2, )
   def guess_rotation(cls, x, y, center_x, center_y):
-    index = cls.find_both_appear_index(np.transpose(x)[0], np.transpose(y)[0])
+    index = cls.find_both_appear_index(np.transpose(x)[1], np.transpose(y)[0])
     r, t = rigid_transform_3D(x[index].T, y[index].T, center_x, center_y)
     return r
 

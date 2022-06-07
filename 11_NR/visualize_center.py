@@ -167,7 +167,7 @@ class Cell_Visualizer(DaVinci):
 if __name__ == '__main__':
   data = 'adam'
   # data = 'fast_multi_2'
-  data = 'T5P5_2'
+  data = 'T5P5_1'
   with open(f'./cell_class/{data}.pkl', 'rb') as f:
     cell = pickle.load(f)
 
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     # cv.draw_rotation(frame, ax)
     center = frame.center
     x_T = np.transpose(frame.r * frame.radius * 2)
-    if i % 1 == 0:
+    if i % 10 == 0:
       for i in range(3):
         rotation[i].append([x_T[i][0] + center[0], x_T[i][1] + center[1], x_T[i][2]])
       # rotation[0].append([frame.x[0]-center[0], frame.y[0] - center[1],  frame.z[0]])
