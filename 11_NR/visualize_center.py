@@ -55,7 +55,7 @@ class Cell_Visualizer(DaVinci):
       else:
         ax.scatter(x.x[i], x.y[i], s=5, c='blue')
     # ax.scatter(x.x, x.y, s=5, c='blue')
-    ax.scatter([x.center[0]], [x.center[1]], s=10, c='red')
+    ax.scatter([x.center[0]], [-x.center[1]], s=10, c='red')
     cir = plt.Circle((x.center[0], x.center[1]), x.radius, color='r', fill=False)
     ax.add_patch(cir)
     width = max (self.x_max - self.x_low, self.y_max - self.y_low)
@@ -167,7 +167,7 @@ class Cell_Visualizer(DaVinci):
 if __name__ == '__main__':
   data = 'adam'
   # data = 'fast_multi_2'
-  data = 'T5P5_1'
+  # data = 'T5P5_1'
   with open(f'./cell_class/{data}.pkl', 'rb') as f:
     cell = pickle.load(f)
 

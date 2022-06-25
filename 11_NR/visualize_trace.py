@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation as R
 
 # load the pkl from the your disk
-data = 'T5P5_4'
+# data = 'T5P5_4'
+data = 'three_before_division'
 with open(f'./cell_class/{data}.pkl', 'rb') as f:
   cell = pickle.load(f)
 
@@ -46,7 +47,7 @@ ax = fig.add_subplot(111, projection='3d')
 line = []
 rotation = []
 for i, frame in enumerate(cell.frames):
-  if i % 10 != 0: continue
+  # if i % 10 != 0: continue
   center = frame.center
   if vis_rotation_axis:
     x_T = np.transpose(frame.r * frame.radius * 2)

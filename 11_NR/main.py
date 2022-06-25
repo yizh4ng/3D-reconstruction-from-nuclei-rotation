@@ -18,8 +18,11 @@ if __name__ == '__main__':
   # data = 'adam'
   # data = 'fast_multi_2'
   data = 'T5P5_4'
-  df = pd.read_pickle(f'./pkl/{data}.pkl')
+  path = r'Z:\Data to ZHANG Yi\20 Rotated COS-7 for quantification\14.Multinucleus relative rotation_19T2 Position 3 mutinucleus relative rotate small angle_Crop001_RAW_ch00'
+  file_name = 'dummy'
+  # df = pd.read_pickle(f'./pkl/{data}.pkl')
   # df = pd.read_pickle(f'./pkl/opt/adam/adam_176.pkl')
+  df = pd.read_pickle(os.path.join(path, file_name + '.pkl'))
   save = True
   steps = 1
   # df = df[(df['frame'] >= 15) & (df['frame'] <= 40)]
@@ -63,10 +66,13 @@ if __name__ == '__main__':
     dict['center'] = center
     if not os.path.exists(f'./results/{data}'):
       os.makedirs(f'./results/{data}')
-    with open(f'./results/{data}/cell.pkl', 'wb+') as f:
-      pickle.dump(dict, f)
-    with open(f'./cell_class/{data}.pkl', 'wb+') as f:
+    # with open(f'./results/{data}/cell.pkl', 'wb+') as f:
+    #   pickle.dump(dict, f)
+    # with open(f'./cell_class/{data}.pkl', 'wb+') as f:
+    #   pickle.dump(cell, f)
+    with open(os.path.join(path, file_name + '_3d.pkl'), 'wb+') as f:
       pickle.dump(cell, f)
+
   cv = Cell_Visualizer(cell)
   # cv.train()
   cv.add_plotter(cv.draw_frame_2d)
