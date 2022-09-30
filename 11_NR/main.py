@@ -9,7 +9,7 @@ from roma import console
 
 from rotating_cell import Rotating_Cell
 from visualize_center import Cell_Visualizer
-from optimize import Trainer
+# from optimize import Trainer
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
@@ -18,11 +18,14 @@ if __name__ == '__main__':
   # data = 'adam'
   # data = 'fast_multi_2'
   data = 'T5P5_4'
-  path = r'Z:\Data to ZHANG Yi\20 Rotated COS-7 for quantification\14.Multinucleus relative rotation_19T2 Position 3 mutinucleus relative rotate small angle_Crop001_RAW_ch00'
-  file_name = 'dummy'
-  # df = pd.read_pickle(f'./pkl/{data}.pkl')
+  # path = r'Z:\Data to ZHANG Yi\20 Rotated HEK 293T for quantification\Yijin Rotated HEK_20220512P9\3 cells in the same FOV\Cell 3'
+  file_name = 'cell 3'
+  df = pd.read_pickle(f'./pkl/adam.pkl')
   # df = pd.read_pickle(f'./pkl/opt/adam/adam_176.pkl')
-  df = pd.read_pickle(os.path.join(path, file_name + '.pkl'))
+  # df = pd.read_pickle(os.path.join(path, file_name + '.pkl'))
+  # df = df[df['frame'] != 0]
+  # df['frame'] -= 1
+
   save = True
   steps = 1
   # df = df[(df['frame'] >= 15) & (df['frame'] <= 40)]
@@ -33,7 +36,9 @@ if __name__ == '__main__':
   # df = df[(df['frame'] >= 75) & (df['frame'] <= 400)]
   # cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=True,
   #                      iterative_times=1, iterate=1)
-  cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=False,
+  # cell = Rotating_Cell(df, del_para=2, radius_para=2, iteratively_op_radius=False,
+  #                      iterative_times=1, iterate=1)
+  cell = Rotating_Cell(df, del_para=2, radius_para=1.8, iteratively_op_radius=False,
                        iterative_times=1, iterate=1)
   cell.run()
 
@@ -70,6 +75,8 @@ if __name__ == '__main__':
     #   pickle.dump(dict, f)
     # with open(f'./cell_class/{data}.pkl', 'wb+') as f:
     #   pickle.dump(cell, f)
+    with open(os.path.join(path, file_name + '_blender.pkl'), 'wb+') as f:
+      pickle.dump(dict, f)
     with open(os.path.join(path, file_name + '_3d.pkl'), 'wb+') as f:
       pickle.dump(cell, f)
 

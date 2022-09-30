@@ -10,6 +10,7 @@ import inspect
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
 class Board(Nomear):
@@ -522,7 +523,7 @@ class Board(Nomear):
     _func = self.slc if which == 'l' else self.soc
 
     # Find cursor range
-    if cursor_range is None:
+    if cursor_range is None or cursor_range == ':':
       begin, end = 1, len(self.layer_plotters if which == 'l' else self.objects)
     else:
       if re.match('^\d+:\d+$', cursor_range) is None:
@@ -532,13 +533,30 @@ class Board(Nomear):
     end += 1
 
     # Find path
-    if fmt not in ('gif', 'mp4'):
+    if fmt not in ('gif', 'mp4', 'png'):
       raise KeyError('!! `fmt` should be `gif` or `mp4`')
+
     if path is None:
       from tkinter import filedialog
-      path = filedialog.asksaveasfilename()
-    if re.match('.*\.{}$'.format(fmt), path) is None:
-      path += '.{}'.format(fmt)
+      if fmt == 'png':
+        path = filedialog.askdirectory()
+      else:
+        path = filedialog.asksaveasfilename()
+        if re.match('.*\.{}$'.format(fmt), path) is None:
+          path += '.{}'.format(fmt)
+
+    if fmt == 'png':
+      tgt = 'objects' if which == 'o' else 'layers'
+      frames = list(range(begin - 1, end - 1))
+      console.show_status(
+        'Saving pngs ({}[{}:{}]) ...'.format(tgt, frames[0], frames[-1]))
+      for i in range(begin - 1, end - 1):
+        self.object_cursor = i
+        self._draw()
+        plt.savefig(os.path.join(path, '{}.png'.format(i)), dpi=400)
+        console.print_progress(i, end - begin)
+      console.show_status('pngs saved to `{}`.'.format(path))
+      return
 
     # Find movie writer
     #writer = animation.FFMpegWriter(fps=fps)

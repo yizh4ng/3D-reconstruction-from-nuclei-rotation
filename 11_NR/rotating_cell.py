@@ -88,7 +88,8 @@ class Rotating_Cell():
           assert (len(self.x) != 0)
           iter += 1
     self.center = Guesser.guess_center(self.x, self.y)
-    self.center = Guesser.smooth_center(self.center)
+    for _ in range(1):
+      self.center = Guesser.smooth_center(self.center)
     R, R_mean = Guesser.guess_radius(self.x, self.y, center)
     self.radius = R
     self.mean_radius = R_mean

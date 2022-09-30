@@ -50,10 +50,13 @@ class Cell_Visualizer(DaVinci):
   def draw_frame_2d(self, x, ax):
     assert isinstance(x, Frame)
     for i in range(len(x.x)):
-      if x.missing[i] == 1:
-        ax.scatter(x.x[i], x.y[i], s=5, c='orange')
+      if i == 0:
+        ax.scatter(x.x[i], x.y[i], s=5, c='green')
       else:
-        ax.scatter(x.x[i], x.y[i], s=5, c='blue')
+        if x.missing[i] == 1:
+          ax.scatter(x.x[i], x.y[i], s=5, c='yellow')
+        else:
+          ax.scatter(x.x[i], x.y[i], s=5, c='blue')
     # ax.scatter(x.x, x.y, s=5, c='blue')
     ax.scatter([x.center[0]], [-x.center[1]], s=10, c='red')
     cir = plt.Circle((x.center[0], x.center[1]), x.radius, color='r', fill=False)
@@ -126,8 +129,11 @@ class Cell_Visualizer(DaVinci):
     # x_T = np.transpose(x.r * x.radius * 2)
     x_T = np.transpose(x.r)
     for i in range(3):
-      ax3d.plot3D([x_T[i][0] + center[0],center[0]],
-                  [x_T[i][1] + center[1],center[1]],
+      # ax3d.plot3D([x_T[i][0] + center[0],center[0]],
+      #             [x_T[i][1] + center[1],center[1]],
+      #             zs=[x_T[i][2],0], c=color_dict[i])
+      ax3d.plot3D([x_T[i][0], 0],
+                  [x_T[i][1], 0],
                   zs=[x_T[i][2],0], c=color_dict[i])
       # ax3d.scatter(x_T[i][0] + center[0], x_T[i][1] + center[1],
       #              x_T[i][2], c=color_dict[i])
@@ -166,33 +172,12 @@ class Cell_Visualizer(DaVinci):
 
 if __name__ == '__main__':
   data = 'adam'
+  # data = 'three_before_division'
+  # data = 'data_fast_2'
   # data = 'fast_multi_2'
-  # data = 'T5P5_1'
+  # data = 'T5P5_4'
   with open(f'./cell_class/{data}.pkl', 'rb') as f:
     cell = pickle.load(f)
-
-  rotation = [0]
-  local_r = 0
-
-  #Following codes show the line chart of rotation
-  for i, frame in enumerate(cell.frames):
-    # if i % 10 != 0: continue
-    rotvec = R.from_matrix(frame.locale_r).as_rotvec(degrees=True)
-    if np.array([0, 0, 1]) @ rotvec > 0:
-      local_r += np.linalg.norm(R.from_matrix(frame.locale_r).as_rotvec(degrees=True))
-    else:
-      local_r += -np.linalg.norm(
-        R.from_matrix(frame.locale_r).as_rotvec(degrees=True))
-    rotation.append(local_r)
-  x_axis = np.arange(len(rotation))
-  plt.plot(x_axis, rotation)
-  plt.show()
-  # Following codes is to enlarge the translation for a better visualization.
-  # for i, frame in enumerate(cell.frames):
-    # if i % 100 != 0: continue
-    # frame.x = frame.x + frame.center[0] * 4
-    # frame.y = frame.y + frame.center[1] * 4
-    # frame.center = frame.center * 5
 
   # Following codes show the animation of cell
   cv = Cell_Visualizer(cell)
@@ -201,120 +186,3 @@ if __name__ == '__main__':
   cv.add_plotter(cv.draw_frame_3d_ellipse)
   cv.add_plotter(cv.draw_rotation)
   cv.show()
-
-  # Following codes show point trace
-  fig = plt.figure()
-  ax = fig.add_subplot(111, projection='3d')
-  # fig = plt.figure(facecolor='white')
-  # ax = plt.axes(frameon=False)
-  line = []
-  rotation = [[],[],[]]
-  for i, frame in enumerate(cell.frames):
-    # if i % 50 == 0:
-      # frame.x = frame.x + frame.center[0] * 4
-      # frame.y = frame.y + frame.center[1] * 4
-      # frame.z = frame.z * 5
-      # frame.center = frame.center * 5
-      # cv.draw_frame_3d_ellipse(frame, ax)
-      # cv.draw_rotation(frame, ax)
-    # cv.draw_rotation(frame, ax)
-    center = frame.center
-    x_T = np.transpose(frame.r * frame.radius * 2)
-    if i % 10 == 0:
-      for i in range(3):
-        rotation[i].append([x_T[i][0] + center[0], x_T[i][1] + center[1], x_T[i][2]])
-      # rotation[0].append([frame.x[0]-center[0], frame.y[0] - center[1],  frame.z[0]])
-      # rotation[1].append([frame.x[0]-center[0], frame.y[0] - center[1],  0])
-
-  for i in range(3):
-    if len(rotation[i]) == 0: continue
-    x, y, z = np.transpose(rotation[i]) * 0.065
-    N = len(x)
-    for j in range(N - 1):
-      if i == 1:
-        # ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-        #         color=(j/N, j/N, j/N), alpha=0.7)
-        ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-                color=plt.cm.jet(j / N), alpha=1.0)
-      else:
-        ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-                color=plt.cm.jet(j / N), alpha=1)
-    # ax.plot3D(*np.transpose(rotation[i]), c=color_dict[i])
-  plt.show()
-  '''ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-  ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-  ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-  # ax.set_xlabel('x')
-  # ax.set_ylabel('y')
-  # ax.get_yaxis().set_ticks([])
-  # ax.get_xaxis().set_ticks([])
-  x_ticks = ax.get_xticks()
-  y_ticks = ax.get_yticks()
-  z_ticks = ax.get_zticks()
-
-
-
-  x = [x_ticks[0], x_ticks[0], x_ticks[-1], x_ticks[-1]]
-  y = [y_ticks[0], y_ticks[-1], y_ticks[-1], y_ticks[0]]
-  z = [0, 0 ,0 ,0]
-  from matplotlib.patches import FancyArrowPatch
-  from mpl_toolkits.mplot3d import proj3d
-
-  class Arrow3D(FancyArrowPatch):
-    def __init__(self, xs, ys, zs, *args, **kwargs):
-        FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
-        self._verts3d = xs, ys, zs
-
-    def draw(self, renderer):
-        xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-        self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
-        FancyArrowPatch.draw(self, renderer)
-
-  from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-  poly = Poly3DCollection([list(zip(x,y,z))], alpha=0.2,color='lightgray')
-  ax.add_collection3d(poly)
-  for y1 in y_ticks:
-    x1, x2 = x_ticks[0], x_ticks[-1]
-    ax.plot([x1, x2], [y1, y1], [0, 0], color='lightgray', alpha=0.5)
-  for x1 in x_ticks:
-    y1, y2 = y_ticks[0], y_ticks[-1]
-    ax.plot([x1, x1], [y1, y2], [0, 0], color='lightgray', alpha=0.5)
-  # ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0))
-  ax.w_xaxis.line.set_color((1.0, 1.0, 1.0, 0))
-  ax.w_yaxis.line.set_color((1.0, 1.0, 1.0, 0))
-  ax.w_zaxis.line.set_color((1.0, 1.0, 1.0, 0))
-  ax.grid(False)
-  a = Arrow3D([x_ticks[0], x_ticks[2]], [y_ticks[0], y_ticks[0]],
-              [z_ticks[0], z_ticks[0]], mutation_scale=3,
-              lw=2, arrowstyle="->", color="black", shrinkA=0)
-  ax.add_artist(a)
-  a = Arrow3D([x_ticks[0], x_ticks[0]], [y_ticks[0], y_ticks[2]],
-              [z_ticks[0], z_ticks[0]], mutation_scale=3,
-              lw=2, arrowstyle="->", color="black", shrinkA=0)
-  ax.add_artist(a)
-  a = Arrow3D([x_ticks[0], x_ticks[0]], [y_ticks[0], y_ticks[0]],
-              [z_ticks[0], z_ticks[2]], mutation_scale=3,
-              lw=2, arrowstyle="->", color="black", shrinkA=0)
-  ax.add_artist(a)
-  # ax.get_yaxis().set_ticks([])
-  # ax.get_xaxis().set_ticks([])
-  # ax.get_zaxis().set_ticks([])
-
-  # plt.grid(color='white', linestyle='-.', linewidth=0.7)
-  # plt.colorbar()
-  for i in range(3):
-    if len(rotation[i]) == 0: continue
-    x, y, z = np.transpose(rotation[i]) * 0.065
-    N = len(x)
-    for j in range(N - 1):
-      if i == 1:
-        # ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-        #         color=(j/N, j/N, j/N), alpha=0.7)
-        ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-                color=plt.cm.jet(j / N), alpha=0.3)
-      else:
-        ax.plot(x[j:j + 2], y[j:j + 2], z[j:j + 2],
-                color=plt.cm.jet(j / N))
-    # ax.plot3D(*np.transpose(rotation[i]), c=color_dict[i])
-  plt.show()'''
